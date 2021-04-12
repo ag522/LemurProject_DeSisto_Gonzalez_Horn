@@ -14,31 +14,48 @@ library(tidyverse)
 library(sf)
 library(leaflet)
 library(mapview)
-LemurData_Raw <- read.csv("../Data/Raw/872_data.csv")
-Sf_LemurData <- st_as_sf(LemurData_Raw,
+LemurData_Raw <- read.csv("./Data/Raw/872_data.csv")
+```
+```{r data wranging}
+LemurData_Site <- LemurData_Raw %>%
+  mutate(Transect_Site2 = Transect_Site) %>%
+  separate(col= Transect_Site2, into="Site", sep ="_")
+
+Sf_LemurData_Site <- st_as_sf(LemurData_Site,
                              coords = c('long','lat'),
                              crs = 32739)
+
+Sf_SitesCharacteristics <- Sf_LemurData_Site %>%
+  group_by() %>%
+  summarise(meanSpeciesDensity = mean(Predicted),
+            tpi = mean(tpi),
+            roughness=mean(roughness),
+            slope= mean(slope),
+            aspect = mean(aspect),
+            flowdir = mean(flowdir),
+            WD = mean(WD))
 ```
 
-## R Markdown
+ 
+```
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+## Maps
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+Maping the sites
 
 ```{r map}
- map1 <- mapview(Sf_LemurData,
-         col.region = "white",
-        alpha.regions = 0.3,
-        color = "black",
-        layer.name = "Gage Height")
-map1
+leaflet(Sf_LemurData_Site) %>%
+addTiles()%>%
+addMarkers()
 
-myMap = mapview(LemurData_Raw,
+mapview(Sf_LemurData_Site, zcol="Site", legend = TRUE)
+
+myMap = mapview(LemurData_Site,
          xcol = "long",
          ycol = "lat", 
-         crs = 32739, 
-         grid = FALSE)
+         crs = 4269, 
+         grid = FALSE,
+         zcol = "Site")
 myMap
 
 myMap  <- leaflet(data=LemurData_Raw) %>% 
@@ -48,6 +65,7 @@ myMap  <- leaflet(data=LemurData_Raw) %>%
                    stroke = FALSE, 
                    fillOpacity = 0.3,
                    popup = ~as.character(`slope`))
+myMap
 #Show the map
 myMap
 
