@@ -1,10 +1,23 @@
 ---
 title: "Lemur_SpatialAnalysis"
 output: html_document
+editor_options:
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+
+getwd()
+library(remotes)
+#remotes::install_github("r-spatial/mapview")
+library(tidyverse)
+library(sf)
+library(leaflet)
+library(mapview)
+LemurData_Raw <- read.csv("../Data/Raw/872_data.csv")
+Sf_LemurData <- st_as_sf(LemurData_Raw,
+                             coords = c('long','lat'),
+                             crs = 32739)
 ```
 
 ## R Markdown
@@ -13,8 +26,31 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
+```{r map}
+ map1 <- mapview(Sf_LemurData,
+         col.region = "white",
+        alpha.regions = 0.3,
+        color = "black",
+        layer.name = "Gage Height")
+map1
+
+myMap = mapview(LemurData_Raw,
+         xcol = "long",
+         ycol = "lat", 
+         crs = 32739, 
+         grid = FALSE)
+myMap
+
+myMap  <- leaflet(data=LemurData_Raw) %>% 
+  addTiles() %>% 
+  addCircleMarkers(~long,~lat,
+                   radius=(2),
+                   stroke = FALSE, 
+                   fillOpacity = 0.3,
+                   popup = ~as.character(`slope`))
+#Show the map
+myMap
+
 ```
 
 ## Including Plots
