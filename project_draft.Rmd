@@ -30,6 +30,9 @@ library(dplyr)
 library(tidyverse)
 library(ggplot2)
 library(agricolae)
+library(sf)
+library(leaflet)
+library(mapview)
 # Set your ggplot theme
 # Load your datasets
 lemur_data <- read.csv("872_data.csv", header=T)
@@ -50,6 +53,29 @@ In this project, we examine a suite of environmental factors in relation to lemu
 
 # Dataset Information
 Data for this project were collected by James Herrera and Camille DeSisto, as a part of a larger project aimed at investigating plant-animal interactions in Madagascar's eastern rainforests. Field data were collected by James Herrera and his colleagues in the montane evergreen rainforest of Ranomafana National Park in southwestern Madagascar. They conducted diurnal and nocturnal lemur surveys at five sites (Ampatsoana, Maharira, Miaranony, Valohoaka, and Vohiparara) between 2011 and 2014. Diurnal lemur surveys were conducted at 31 transects among these five sites, whereas nocturnal lemur surveys were conducted at 26 of these sites due to logistical constraints. Habitat variables (slope, roughness, location, topogaphic position index, elevation, flow direction, and aspect) were collected along each transects. Additionally, vegetation data were collected from botanical surveys every 100 m along each transect. Camille DeSisto calculated lemur densities using a distance sampling and model averaging approach that jointly modeled for detection and density, using the R packages "unmarked" and "MuMln" (Fiske & Chandler 201; Barton 2020). Trait data were previously collected from the literature and mean trait values were calculated for each transect as part of the larger research project . 
+
+Below is a map of all 31 project transect sites
+```{r}
+Sf_LemurData <- st_as_sf(lemur_data,
+                             coords = c('long','lat'),
+                             crs = 4326)
+
+Sf_Sites<- Sf_LemurData %>%
+  mutate(Transect_Site2 = Transect_Site) %>%
+  separate(col= Transect_Site2, into="Site", sep ="_") %>%
+  group_by(Transect_Site, Site) %>%
+  summarise(meanSpeciesDensity = mean(Predicted),
+            tpi = mean(tpi),
+            roughness=mean(roughness),
+            slope= mean(slope),
+            aspect = mean(aspect),
+            flowdir = mean(flowdir),
+            WD = mean(WD))
+
+Map_Transect<- mapview(Sf_Sites,zcol="Site", legend = TRUE, alpha=0.5, cex=8, label = "Transect_Site",layer.name = 'Site')
+Map_Transect
+```
+
 
 
 \newpage
