@@ -49,7 +49,7 @@ mapviewOptions(basemaps = c("OpenStreetMap.DE"),
                vector.palette = colorRampPalette(brewer.pal(9, "YlGnBu")),
                layers.control.pos = "topright")
 
-Map_Transect<- mapview(Sf_SitesCharacteristics,zcol="Site", legend = TRUE, alpha=0.5, cex=8, label = "Transect_Site")
+Map_Transect<- mapview(Sf_SitesCharacteristics,zcol="Site", legend = TRUE, alpha=0.5, cex=8, label = "Transect_Site",layer.name = 'Site')
 Map_Transect
 
 ```
@@ -57,16 +57,34 @@ Map_Transect
 
 ```{r Site by average pop density}
 
-Map_Density<- mapview(Sf_SitesCharacteristics,zcol="meanSpeciesDensity", legend = TRUE, cex="meanSpeciesDensity", label = "Transect_Site")
+Map_Density<- mapview(Sf_SitesCharacteristics,zcol="meanSpeciesDensity", legend = TRUE, cex="meanSpeciesDensity", label = "Transect_Site",layer.name = 'Mean Species Population Density')
 Map_Density
 
-Sf_SitesCharacteristics_notMiaranony <- Sf_SitesCharacteristics %>%
-filter(Site!= "Miaranony")
+Sf_AvDensity_Below3 <- Sf_SitesCharacteristics %>%
+filter(meanSpeciesDensity< 3)
 
-Map_Density2<- mapview(Sf_SitesCharacteristics_notMiaranony,zcol="meanSpeciesDensity", legend = TRUE, cex="meanSpeciesDensity", label = "Transect_Site")
+Map_Density2<- mapview(Sf_AvDensity_Below3,zcol="meanSpeciesDensity", legend = TRUE, cex="meanSpeciesDensity", label = "Transect_Site",layer.name = 'Mean Population Density')
 Map_Density2
 
 
 ```
+```{r Maping by species}
+LemurData_Avahi_laniger <- Sf_LemurData_Site %>%
+filter(Species=="Avahi_laniger")
+
+Map_Avahi_Density <- mapview(LemurData_Avahi_laniger,zcol="Predicted", legend = TRUE, cex="Predicted", label = "Transect_Site",layer.name = 'Population Density')
+Map_Avahi_Density
+
+LemurData_Cheirogaleus_crossleyi <- Sf_LemurData_Site %>%
+filter(Species=="Cheirogaleus_crossleyi")
+
+Map_Cheirogaleus_Density <- mapview(LemurData_Cheirogaleus_crossleyi,zcol="Predicted", legend = TRUE, cex="Predicted", label = "Transect_Site",layer.name = 'Population Density')
+Map_Cheirogaleus_Density
+
+unique(LemurData_Site$Species)
+
+
+```
+
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
