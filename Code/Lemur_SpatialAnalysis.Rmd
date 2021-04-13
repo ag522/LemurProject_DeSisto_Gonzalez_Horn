@@ -23,10 +23,10 @@ LemurData_Site <- LemurData_Raw %>%
 
 Sf_LemurData_Site <- st_as_sf(LemurData_Site,
                              coords = c('long','lat'),
-                             crs = 32739)
+                             crs = 4326)
 
 Sf_SitesCharacteristics <- Sf_LemurData_Site %>%
-  group_by() %>%
+  group_by(Transect_Site, Site) %>%
   summarise(meanSpeciesDensity = mean(Predicted),
             tpi = mean(tpi),
             roughness=mean(roughness),
@@ -43,40 +43,30 @@ Sf_SitesCharacteristics <- Sf_LemurData_Site %>%
 
 Maping the sites
 
-```{r map}
-leaflet(Sf_LemurData_Site) %>%
-addTiles()%>%
-addMarkers()
+```{r Site Characteristic map}
 
-mapview(Sf_LemurData_Site, zcol="Site", legend = TRUE)
+mapviewOptions(basemaps = c("OpenStreetMap.DE"),
+               vector.palette = colorRampPalette(brewer.pal(9, "YlGnBu")),
+               layers.control.pos = "topright")
 
-myMap = mapview(LemurData_Site,
-         xcol = "long",
-         ycol = "lat", 
-         crs = 4269, 
-         grid = FALSE,
-         zcol = "Site")
-myMap
-
-myMap  <- leaflet(data=LemurData_Raw) %>% 
-  addTiles() %>% 
-  addCircleMarkers(~long,~lat,
-                   radius=(2),
-                   stroke = FALSE, 
-                   fillOpacity = 0.3,
-                   popup = ~as.character(`slope`))
-myMap
-#Show the map
-myMap
+Map_Transect<- mapview(Sf_SitesCharacteristics,zcol="Site", legend = TRUE, alpha=0.5, cex=8, label = "Transect_Site")
+Map_Transect
 
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+```{r Site by average pop density}
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+Map_Density<- mapview(Sf_SitesCharacteristics,zcol="meanSpeciesDensity", legend = TRUE, cex="meanSpeciesDensity", label = "Transect_Site")
+Map_Density
+
+Sf_SitesCharacteristics_notMiaranony <- Sf_SitesCharacteristics %>%
+filter(Site!= "Miaranony")
+
+Map_Density2<- mapview(Sf_SitesCharacteristics_notMiaranony,zcol="meanSpeciesDensity", legend = TRUE, cex="meanSpeciesDensity", label = "Transect_Site")
+Map_Density2
+
+
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
