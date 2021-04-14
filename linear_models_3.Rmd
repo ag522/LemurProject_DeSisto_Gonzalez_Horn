@@ -1,0 +1,265 @@
+---
+title: "linear_models_3"
+author: "Courtney Horn"
+date: "4/14/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+getwd()
+library(lme4)
+install.packages("lmerTest")
+require(lmerTest)
+```
+
+
+```{r exploration of dataset, include = FALSE}
+#GLMs are a framework to look at how variables affect different continuous variables.
+
+colnames(trait_data2)
+#interesting fruit and lansdcape traits: logSeedLength, logNitrogen, lat, Transect_Site, logSeedWidth, logTannins, roughness, long, logSugar, logSLA, slope, Site, logFruitLength, logFat, Species, aspect, logFruitWidth, logProtein
+
+
+  #exploring the variables of interest
+class(trait_data2$logSeedLength)
+#numeric
+class(trait_data2$logNitrogen)
+#numeric
+class(trait_data2$lat)
+#numeric
+class(trait_data2$Transect_Site)
+#character
+#levels include Maharira_B, Maharira_C, Miaranony_E
+#Transect_Site appears to indicate different transects within each site
+#Camille used Site for her analyses
+class(trait_data2$logSeedWidth)
+#numeric
+class(trait_data2$logTannins)
+class(trait_data2$roughness)
+#integer
+class(trait_data2$long)
+#numeric
+class(trait_data2$logSugar)
+class(trait_data2$logSLA)
+class(trait_data2$slope)
+#numeric
+class(trait_data2$Site)
+#character
+unique(trait_data2$Site)
+#5 sites
+
+
+  #now exploring the meaning of some of the variables: I'm unsure what X, tpi, WD, roughness, logSLA, aspect, and flowdir mean
+trait_data2$X
+class(trait_data2$X)
+#integer
+trait_data2$tpi
+class(trait_data2$tpi)
+trait_data2$WD
+#these appear to all be decimals below 1
+trait_data2$roughness
+class(trait_data2$roughness)
+#integer
+trait_data2$aspect
+class(trait_data2$aspect)
+#numeric
+trait_data2$Species
+unique(trait_data2$Species)
+#9 species of lemurs
+class(trait_data2$Species)
+#character
+trait_data2$flowdir
+class(trait_data2$flowdir)
+#integer
+
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r linear models of drivers of differential density between sites with no random effects and no interactions}
+
+#interesting fruit and lansdcape traits: logSeedLength, logNitrogen, lat, Transect_Site, logSeedWidth, logTannins, roughness, long, logSugar, logSLA, slope, Site, logFruitLength, logFat, Species, aspect, logFruitWidth, logProtein
+
+lm1 <- lm(data = trait_data2, Predicted ~ logSeedLength + logNitrogen + lat + Transect_Site + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + Site + logFruitLength + logFat + Species + aspect + logFruitWidth + logProtein)
+summary(lm1)
+#SpeciesEulemur_rubriventer, SpeciesEulemur_rufifrons, SpeciesMicrocebus_rufus, and SpeciesPropithecus_edwardsi are the only significant variables
+#Transect_SiteMiaranony_B and Transect_SiteMiaranony_A are marginally significant
+
+```
+
+
+
+```{r more linear models of drivers of differential density between sites with no random effects and no interactions}
+  #now I am going to try more linear models. This time I wont include species and transect site
+lm2 <- lm(data = trait_data2, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + Site + logFruitLength + logFat + aspect + logFruitWidth + logProtein)
+summary(lm2)
+summary.aov(lm2)
+#this model is on the cusp of significance (p-value = 0.06332)
+#this model appears to explain about 40% of variability in lemur density (Adjusted R-squared:  0.3994)
+#logNitrogen is significant (p value = 0.000595). logSeedLength is on the cusp of significance (p value = 0.064323)
+
+```
+
+
+```{r linear models with random effects}
+#linear model with Species and Transect_Site as random variables
+lmer_Species_TS1 <- lmer(data = trait_data2, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + Site + logFruitLength + logFat + aspect + logFruitWidth + logProtein + (1|Species) + (1|Transect_Site))
+summary(lmer1)
+#I'm unsure if this model is significant, but Pr(>|t|) for the intercept = 0.97573  
+
+#linear model with species, transect_site, and site as random variables
+lmer_Species_TS_Site_1 <- lmer(data = trait_data2, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + logFruitLength + logFat + aspect + logFruitWidth + logProtein + (1|Species) + (1|Transect_Site) + (1|Site))
+summary(lmer_Species_TS_Site_1)
+   #the lmer3 doesn't look significant, but I'm going to try to reduce the variables so that it will become significant
+
+
+#linear model with only Species as random variable and no transect site included
+lmer_Species_1 <- lmer(data = trait_data2, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + Site + logFruitLength + logFat + aspect + logFruitWidth + logProtein + (1|Species))
+summary(lmer2)
+
+
+  #I feel like we should use the lmer with Species and Transect_Site as random variables (lmer_Species_TS1)
+
+
+par(mfrow = c(2,2), mar=c(4,4,4,4))
+plot(lmer_Species_TS1)
+par(mfrow = c(1,1))
+#hmm this resisduals versus fitted plot just doesn't look good
+#we want symmetry for the plot and for the line to be as flat as possible (except no line appeared...)
+
+
+```
+```{r reducing the variables of the linear models with Species and Transect_Site as random effects}
+lmer_Species_TS2 <- update(lmer_Species_TS1,~.-logSLA)
+summary(lmer_Species_TS2)
+#this is a modification of lmer1, which has all of the variables of interest and both species and transect_site as random variables
+#the model still doesn't seem significant (Pr(>|t|) of the intercept of the model = 0.96296)
+#logNitrogen (p value = 0.00511), lat (pvalue = 0.04397), roughness (pvalue = 0.04369), SiteValohoaka (0.04908), SiteVohiparara (0.02728), and logFruitWidth (0.03597) are significant. 
+lmer_Species_TS3 <- update(lmer_Species_TS2,~.-SiteMiaranony)
+summary(lmer_Species_TS3)
+
+lmer_Species_TS4 <- update(lmer_Species_TS3,~.-logSeedLength)
+summary(lmer_Species_TS4)
+
+lmer_Species_TS5 <- update(lmer_Species_TS4,~.-logTannins)
+summary(lmer_Species_TS5)
+
+lmer_Species_TS6 <- update(lmer_Species_TS5,~.-aspect)
+summary(lmer_Species_TS6)
+
+lmer_Species_TS7 <- update(lmer_Species_TS6,~.-logSeedWidth)
+summary(lmer_Species_TS7)
+
+lmer_Species_TS8 <- update(lmer_Species_TS7,~.-logProtein)
+summary(lmer_Species_TS8)
+
+lmer_Species_TS9 <- update(lmer_Species_TS8,~.-logFat)
+summary(lmer_Species_TS9)
+
+lmer_Species_TS10 <- update(lmer_Species_TS9,~.-long)
+summary(lmer_Species_TS10)
+#now the intercept is significant!
+  #going to keep removing variables to figure out what gives me the best model
+
+lmer_Species_TS11 <- update(lmer_Species_TS10,~.-logSugar)
+summary(lmer_Species_TS11)
+#the p value decreased
+
+lmer_Species_TS12 <- update(lmer_Species_TS11,~.-SiteMiaranony)
+summary(lmer_Species_TS12)
+
+  #now comparing the models I built with both Species and Transect_Site as random variables
+anova(lmer_Species_TS10, lmer_Species_TS11, lmer_Species_TS12)
+#this seems to indicate that lmer_Species_TS11 and lmer_Species_TS12 are equally good
+AIC(lmer_Species_TS10, lmer_Species_TS11, lmer_Species_TS12)
+#this indicates lmer_Species_TS10 is the best
+
+summary(lmer_Species_TS10)
+summary(lmer_Species_TS11)
+summary(lmer_Species_TS12)
+#I think I would select TS11 or TS12 because all of the variables are significant in those models
+#TS11 has logNitrogen, lat, roughness, slope, SiteMaharira, SiteValohoaka, SiteVohiparara, logFruitLength, and logFruitWidth as significant variables
+
+par(mfrow = c(2,2), mar=c(4,4,4,4))
+plot(lmer_Species_TS11)
+par(mfrow = c(1,1))
+#this plot doesn't seem like its improved since I reduced the model
+
+
+```
+
+
+```{r reducing models with species transect_site, species, and site as random variables }
+#lmer_Species_TS_Site_1 is the initial model
+summary(lmer_Species_TS_Site_1)
+lmer_Species_TS_Site_2 <- update(lmer_Species_TS_Site_1,~.-lat)
+summary(lmer_Species_TS_Site_2)
+
+lmer_Species_TS_Site_3 <- update(lmer_Species_TS_Site_2,~.-logSeedLength)
+summary(lmer_Species_TS_Site_3)
+#the p value is now significant!
+
+lmer_Species_TS_Site_4 <- update(lmer_Species_TS_Site_3,~.-aspect)
+summary(lmer_Species_TS_Site_4)
+
+lmer_Species_TS_Site_5 <- update(lmer_Species_TS_Site_4,~.-logFat)
+summary(lmer_Species_TS_Site_5)
+
+lmer_Species_TS_Site_6 <- update(lmer_Species_TS_Site_5,~.-logProtein)
+summary(lmer_Species_TS_Site_6)
+
+lmer_Species_TS_Site_7 <- update(lmer_Species_TS_Site_6,~.-logSLA)
+summary(lmer_Species_TS_Site_7)
+
+lmer_Species_TS_Site_8 <- update(lmer_Species_TS_Site_7,~.-logSugar)
+summary(lmer_Species_TS_Site_8)
+
+
+lmer_Species_TS_Site_9 <- update(lmer_Species_TS_Site_8,~.-logTannins)
+summary(lmer_Species_TS_Site_9)
+
+lmer_Species_TS_Site_10 <- update(lmer_Species_TS_Site_9,~.-logSeedWidth)
+summary(lmer_Species_TS_Site_10)
+#the intercept is no longer significant
+
+lmer_Species_TS_Site_11 <- update(lmer_Species_TS_Site_10,~.-long)
+summary(lmer_Species_TS_Site_11)
+
+lmer_Species_TS_Site_12 <- update(lmer_Species_TS_Site_11,~.-roughness)
+summary(lmer_Species_TS_Site_12) 
+#the intercept still isn't significant
+
+lmer_Species_TS_Site_13 <- update(lmer_Species_TS_Site_12,~.-slope)
+summary(lmer_Species_TS_Site_13) 
+#the intercept is significant again
+
+  
+```
+
+```{r comparing models with species transect_site and site as random variables}
+anova(lmer_Species_TS_Site_3, lmer_Species_TS_Site_4, lmer_Species_TS_Site_5, lmer_Species_TS_Site_6, lmer_Species_TS_Site_7, lmer_Species_TS_Site_8, lmer_Species_TS_Site_9, lmer_Species_TS_Site_10, lmer_Species_TS_Site_11, lmer_Species_TS_Site_12, lmer_Species_TS_Site_13)
+#the 13th and 8th models appear to have the lowest AIC
+AIC(lmer_Species_TS_Site_3, lmer_Species_TS_Site_4, lmer_Species_TS_Site_5, lmer_Species_TS_Site_6, lmer_Species_TS_Site_7, lmer_Species_TS_Site_8, lmer_Species_TS_Site_9, lmer_Species_TS_Site_10, lmer_Species_TS_Site_11, lmer_Species_TS_Site_12, lmer_Species_TS_Site_13)
+#it seems that the 4th model has the lowest AIC
+
+summary(lmer_Species_TS_Site_4)
+summary(lmer_Species_TS_Site_5)
+summary(lmer_Species_TS_Site_6)
+summary(lmer_Species_TS_Site_7)
+summary(lmer_Species_TS_Site_8)
+#I feel like the 8th one is the best model because all but one of the variables are significant
+
+#the 8th model has logNitrogen, logSeedWidth, roughness, long, logSugar, slope, logFruitLength, and logFruitWidth as significant variables
+#logTannins is marginally significant
+
+```
+
+
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
