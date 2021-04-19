@@ -92,6 +92,7 @@ dim(lemur_data)
 \newpage
 
 # Analysis
+First, a one-way ana;ysis of variance (ANOVA) was conducted on sites  anlysis was conductedUsing an anova analysis 
 
 ```{r}
 trait_data2 <- lemur_data %>%
