@@ -17,7 +17,7 @@ data <- data %>%
     separate(col= Transect_Site2, into="Site", sep ="_") 
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
+ui <- fluidPage( shinythemes::themeSelector(),
 
     # Application title
     titlePanel("Transect Site Information"),
@@ -33,7 +33,11 @@ ui <- fluidPage(
                 "Eulemur_rubriventer","Propithecus_edwardsi",
                 "Lepilemur_microdon","Hapalemur_griseus",
                  "Eulemur_rufifrons","Varecia_variegata",
-                 "Microcebus_rufus" ), selected = "Avahi_laniger")
+                 "Microcebus_rufus" ), selected = "Avahi_laniger"),
+    
+    selectInput("variable","Select transect information desired", 
+                choices = c("Predicted","slope","logSeedLength",
+                            "logNitrogen"), selected = "Predicted")
     )
     ))
         
@@ -43,15 +47,14 @@ ui <- fluidPage(
 
 server <- function(input, output) {
     #Subset data based on user selection
-    #filteredData <- reactive({
-        #data[data$Species == input$Species]
-    #})
+    
     filteredData <- reactive({
         data %>%
-        filter(Species == input$Species)})
+        filter(Species == input$Species)%>%
+                input$variable == "variable"})
     #Define colors
     pal <- colorNumeric(
-    palette = c('blue', 'gold', 'dark orange', 'orange red', 'red', 'dark red'),
+    palette = c('navy','royal blue 1','cyan', 'gold', 'dark orange', 'orange red', 'red', 'dark red'),
     domain = data$Predicted)
 
     
@@ -63,7 +66,10 @@ server <- function(input, output) {
                         popup = ~as.character(Predicted),
                         label = ~as.character(paste0("Population Density: ",
                                  sep = " ", Predicted)),color = ~pal(Predicted),
-                                              fillOpacity = 0.5)
+                                              fillOpacity = 0.9)%>%
+            addLegend("bottomright",pal = pal, values = ~Predicted,
+                      title = "Population Density",
+                      opacity=1)
             
             })
     
