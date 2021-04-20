@@ -1,0 +1,90 @@
+---
+title: "Lemur_SpatialAnalysis"
+output: html_document
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+
+getwd()
+library(remotes)
+#remotes::install_github("r-spatial/mapview")
+library(tidyverse)
+library(sf)
+library(leaflet)
+library(mapview)
+LemurData_Raw <- read.csv("./Data/Raw/872_data.csv")
+```
+```{r data wranging}
+LemurData_Site <- LemurData_Raw %>%
+  mutate(Transect_Site2 = Transect_Site) %>%
+  separate(col= Transect_Site2, into="Site", sep ="_")
+
+Sf_LemurData_Site <- st_as_sf(LemurData_Site,
+                             coords = c('long','lat'),
+                             crs = 4326)
+
+Sf_SitesCharacteristics <- Sf_LemurData_Site %>%
+  group_by(Transect_Site, Site) %>%
+  summarise(meanSpeciesDensity = mean(Predicted),
+            tpi = mean(tpi),
+            roughness=mean(roughness),
+            slope= mean(slope),
+            aspect = mean(aspect),
+            flowdir = mean(flowdir),
+            WD = mean(WD))
+```
+
+ 
+```
+
+## Maps
+
+Maping the sites
+
+```{r Site Characteristic map}
+
+mapviewOptions(basemaps = c("OpenStreetMap.DE"),
+               vector.palette = colorRampPalette(brewer.pal(9, "YlGnBu")),
+               layers.control.pos = "topright")
+
+Map_Transect<- mapview(Sf_SitesCharacteristics,zcol="Site", legend = TRUE, alpha=0.5, cex=8, label = "Transect_Site",layer.name = 'Site')
+Map_Transect
+
+```
+
+
+```{r Site by average pop density}
+
+Map_Density<- mapview(Sf_SitesCharacteristics,zcol="meanSpeciesDensity", legend = TRUE, cex="meanSpeciesDensity", label = "Transect_Site",layer.name = 'Mean Species Population Density')
+Map_Density
+
+Sf_AvDensity_Below3 <- Sf_SitesCharacteristics %>%
+filter(meanSpeciesDensity< 3)
+
+Map_Density2<- mapview(Sf_AvDensity_Below3,zcol="meanSpeciesDensity", legend = TRUE, cex="meanSpeciesDensity", label = "Transect_Site",layer.name = 'Mean Population Density')
+Map_Density2
+
+
+```
+```{r Maping by species}
+LemurData_Avahi_laniger <- Sf_LemurData_Site %>%
+filter(Species=="Avahi_laniger")
+
+Map_Avahi_Density <- mapview(LemurData_Avahi_laniger,zcol="Predicted", legend = TRUE, cex="Predicted", label = "Transect_Site",layer.name = 'Population Density')
+Map_Avahi_Density
+
+LemurData_Cheirogaleus_crossleyi <- Sf_LemurData_Site %>%
+filter(Species=="Cheirogaleus_crossleyi")
+
+Map_Cheirogaleus_Density <- mapview(LemurData_Cheirogaleus_crossleyi,zcol="Predicted", legend = TRUE, cex="Predicted", label = "Transect_Site",layer.name = 'Population Density')
+Map_Cheirogaleus_Density
+
+unique(LemurData_Site$Species)
+
+
+```
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
