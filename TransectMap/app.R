@@ -25,7 +25,20 @@ ui <- fluidPage( shinythemes::themeSelector(),
     sidebarLayout(
         
         mainPanel(
-    leafletOutput(outputId="mymap")
+    leafletOutput(outputId="mymap"),
+    br(),
+    br(),
+    br(),
+    br(),
+    br(),
+    br(),
+    br(),
+    br(),
+    plotOutput("scatterplot" , brush = brushOpts(id = "scatterplot_brush")),
+    
+    
+    
+    
     ),
     sidebarPanel(
     selectInput("Species","Select a Species:", 
@@ -37,7 +50,14 @@ ui <- fluidPage( shinythemes::themeSelector(),
     
     selectInput("site","Select Site", 
                 choices = c("Ampatsoana","Maharira","Miaranony",
-                            "Valohoaka","Vohiparara","ALL"), selected = "ALL")
+                            "Valohoaka","Vohiparara","ALL"), selected = "ALL"),
+    selectInput("X","Select X variable", 
+                choices = c("logSugar","logFat","logProtein",
+                            "logNitrogen","logTannins","tpi","roughness","slope","aspect"), selected = "logSugar"),
+    selectInput("Fill","Select graph fill variable", 
+                choices = c("logSugar","logFat","logProtein",
+                            "logNitrogen","logTannins","tpi","roughness","slope","aspect"), selected = "logSugar")
+   
     )
     ))
         
@@ -74,21 +94,19 @@ server <- function(input, output) {
                       opacity=1)
             
             })
-    
-    #observe({
-        #define the color pallate for density
-        #pal <- colorNumeric(
-            #palette = c('gold', 'orange', 'dark orange', 'orange red', 'red', 'dark red'),
-            #domain = filteredData$Predicted)
-        #leafletProxy("mymap", data = filteredData())%>%
-            #clearShapes() %>%
-            #addCircles( weight = 1, radius = ~sqrt(Predicted)*250, popup = ~as.character(Predicted), 
-                       #label = ~as.character(paste0("Population Density: ", sep = " ", Predicted), 
-                       #color = ~pal(Predicted), fillOpacity = 0.5)
-            
-        
-   # })
-            
+    # Create a ggplot object for the type of plot you have defined in the UI  
+    output$scatterplot <- renderPlot({
+        ggplot( filteredData() ,
+               aes_string(x = input$X, y ="Predicted", fill = input$Fill )) +
+            geom_point(alpha = 0.9, size = 8) +
+            theme_classic(base_size = 15) +
+            labs(x = input$X , y =expression(Population ~ (mu*g / L)),fill = input$Fill  ) +
+            scale_fill_distiller(palette = "GnBu", guide = "colorbar", direction = 1)
+        #scale_fill_viridis_c()
+    })
+  
+   
+   
     
 }
 
