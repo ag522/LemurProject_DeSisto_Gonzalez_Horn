@@ -92,7 +92,7 @@ dim(lemur_data)
 \newpage
 
 # Analysis
-First, a one-way analysis of variance (ANOVA) was conducted on lemur population density by site. The analysis was significant F (4,254)= 3.469, p = 0.009, meaning that there is a significatn difference in lemur densities between different sites. A post-hoc test revelaed that the difference can be found between Miaranony and Ampatsoana, Miaranony and Maharira sites. However, after analyzing the Lemur Density per site boxplots(figure 1), there is strong evidence that the higher lemur densities seen in  Miaranony and Valohoaka are the result of outliers. 
+
 
 
 #and Miaranony and Vohiparara 
@@ -146,7 +146,17 @@ density_aov_scatterplot <- ggplot(data = trait_data2, aes(x = reorder(Species, P
 
 
 
-## Question 1: <insert specific question here and add additional subsections for additional questions below, if needed>
+## Question 1: Is there a significan difference between lemur population densities between sites or species? 
+
+First, a one-way analysis of variance (ANOVA) was conducted on lemur population density by site. The analysis was significant F (4,254)= 3.469, p = 0.009, meaning that there is a significatn difference in lemur densities between different sites. A post-hoc test revelaed that the difference can be found between Miaranony and Ampatsoana, Miaranony and Maharira sites. However, after analyzing the Lemur Density per site boxplots(figure 1), there is strong evidence that the higher lemur densities seen in  Miaranony and Valohoaka are the result of outliers. 
+Next, a second one-way analysis of variance (ANOVA) was conducted on lemur population density by species. The analysis was very significant  F (8,250) = 16.79, p = <2e-16, meaning that there is a strong difference in lemur densities between different species. Post-hoc tests indicate that species fall into four main groups according to their density:
+
+Group                                                                                                     | Average population Density
+------------------------------|---------------------------------------------------------------------------|-----------------------------
+- *Eulemur rubriventer*,*Propithecus edwardsi*,*Microcebus rufus*                                         | 2.72 - 3.80
+- *Propithecus edwardsi*,*Microcebus rufus*,*Eulemur rufifrons*                                           | 2.31 - 3.03
+- *Eulemur rufifrons* ,*Hapalemur griseus*                                                                | 1.11 - 2.31
+- *Hapalemur griseus*,*Varecia variegata *,*Cheirogaleus crossleyi*,*Avahi laniger *,*Lepilemur microdon* | 0.24 - 1.11
 
 ## Question 2: 
 
