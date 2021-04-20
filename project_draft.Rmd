@@ -92,7 +92,10 @@ dim(lemur_data)
 \newpage
 
 # Analysis
-First, a one-way ana;ysis of variance (ANOVA) was conducted on sites  anlysis was conductedUsing an anova analysis 
+First, a one-way analysis of variance (ANOVA) was conducted on lemur population density by site. The analysis was significant F (4,254)= 3.469, p = 0.009, meaning that there is a significatn difference in lemur densities between different sites. A post-hoc test revelaed that the difference can be found between Miaranony and Ampatsoana, Miaranony and Maharira sites. However, after analyzing the Lemur Density per site boxplots(figure 1), there is strong evidence that the higher lemur densities seen in  Miaranony and Valohoaka are the result of outliers. 
+
+
+#and Miaranony and Vohiparara 
 
 ```{r}
 trait_data2 <- lemur_data %>%
