@@ -25,11 +25,8 @@ mainfont: Times New Roman
 # Set your working directory
 getwd()
 # Load your packages
-library(lme4)
-library(dplyr)
-library(tidyverse)
 library(ggplot2)
-library(agricolae)
+library(tidyverse)
 # Set your ggplot theme
 # Load your datasets
 lemur_data <- read.csv("872_data.csv", header=T)
@@ -56,13 +53,6 @@ Data for this project were collected by James Herrera and Camille DeSisto, as a 
 
 # Exploratory Analysis 
 
-```{r}
-head(lemur_data)
-dim(lemur_data)
-
-summary(lemur_data$Predicted)
-
-```
 
 
 \newpage
@@ -70,55 +60,8 @@ summary(lemur_data$Predicted)
 # Analysis
 
 
-## Question 1: Are there significant differences in lemur densities among the different sites and among the different species? If so, how can the sites and species be grouped to reflect the patterns in densities? 
-```{r}
-trait_data2 <- lemur_data %>%
-  mutate(Transect_Site2 = Transect_Site)%>%
-  separate(col= Transect_Site2, into="Site", sep ="_")
- 
 
-density_anova <- aov(data= trait_data2, Predicted ~ Site)
-summary(density_anova)
-
-#I reject the null hypothesis and conclude that there is a significant difference in lemur densities between different sites (p = 0.009). 
-TukeyHSD(density_anova)
-# There is a significant difference in lemur densities between Miaranony and Ampatsoana, Miaranony and Maharira, 
-#and Miaranony and Vohiparara 
-
-anova_groups <- HSD.test(density_anova, "Site", group=TRUE)
-# the predicted groups according to their lemur densities are Miaranony and Valohoaka being in group a 
-# and Valohoaka, Vohiparara, Ampatsoana, and Maharira in group b 
-
-density_aov_plot <- ggplot(data = trait_data2, aes(x = Site, y = Predicted))+
-  geom_boxplot()+
-  ylab("Lemur Density (N Individuals/"~(Km^2))+
-  theme_classic()
-#based on the plot it looks like it might be outliers that are driving the pattern we see of higher lemur densities
-# in Miaranony and Valohoaka 
-
-
-density_anova2 <- aov(data= trait_data2, Predicted ~ Species)
-summary(density_anova2)
-
-#I reject the null hypothesis and conclude that there is a significant difference in lemur densities between different species (p < 0.001).
-
-TukeyHSD(density_anova2)
-
-anova_groups <- HSD.test(density_anova2, "Species", group=TRUE)
-# the lemur species fall into four groups according to their densities 
-#What is interesting is that the groups do not seem to be organized by taxonomic family, body size, or whether they are nocturnal. diurnal
-
-density_aov_scatterplot <- ggplot(data = trait_data2, aes(x = reorder(Species, Predicted, FUN = median), y = Predicted))+
-  geom_boxplot()+
-  ylab("Lemur Density (N Individuals/"~(Km^2))+
-  xlab("Species")+
-  theme_classic()+
-  scale_x_discrete(labels= c("V. variegata", "L. microdon", "A. laniger", "C. crossleyi", "E. rufifrons", "H. gruseus", "M. rufus", "P. edwardsi", "E. rubriventer"))+
-  theme(axis.text.x = element_text(angle = 45, vjust=0.5))
-  
-```
-
-
+## Question 1: <insert specific question here and add additional subsections for additional questions below, if needed>
 
 ## Question 2: 
 
