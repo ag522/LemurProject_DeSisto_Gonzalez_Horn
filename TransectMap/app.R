@@ -85,7 +85,7 @@ server <- function(input, output) {
         leaflet(filteredData()) %>% 
             addTiles() %>%
             addCircles( weight = 1, radius = ~sqrt(Predicted)*250, 
-                        popup = ~as.character(Predicted),
+                        popup = ~as.character(Transect_Site),
                         label = ~as.character(paste0("Population Density: ",
                                  sep = " ", Predicted)),color = ~pal(Predicted),
                                               fillOpacity = 0.9)%>%
@@ -96,12 +96,14 @@ server <- function(input, output) {
             })
     # Create a ggplot object for the type of plot you have defined in the UI  
     output$scatterplot <- renderPlot({
-        ggplot( filteredData() ,
-               aes_string(x = input$X, y ="Predicted", fill = input$Fill )) +
-            geom_point(alpha = 0.9, size = 8) +
-            theme_classic(base_size = 15) +
-            labs(x = input$X , y =expression(Population ~ (mu*g / L)),fill = input$Fill  ) +
-            scale_fill_distiller(palette = "GnBu", guide = "colorbar", direction = 1)
+      ggplot(filteredData(), 
+             aes_string(x = input$X, y = "Predicted", fill=input$Fill)) +
+        geom_point(alpha = 0.8, size = 10, shape = 21) +
+        geom_smooth(method = lm, se=FALSE, color="red", aes(group = 1)) +
+        theme_classic(base_size = 14) +
+        scale_shape_manual(values = c(21, 24)) +
+        labs(x = input$X, y = "Lemur Population Density",  fill = input$Fill) +
+        scale_fill_distiller(palette = "YlGnBu", guide = "colorbar", direction = 1)
         #scale_fill_viridis_c()
     })
   
