@@ -56,7 +56,7 @@ server <- function(input, output) {
     
     #Define colors
     pal <- colorNumeric(
-    palette = c('navy','royal blue 1','cyan', 'gold', 'dark orange', 'orange red', 'red', 'dark red'),
+    palette = c('navy','deep sky blue 1','cyan', 'gold', 'dark orange', 'orange red', 'red', 'dark red'),
     domain = data$Predicted)
 
     
