@@ -35,9 +35,9 @@ ui <- fluidPage( shinythemes::themeSelector(),
                  "Eulemur_rufifrons","Varecia_variegata",
                  "Microcebus_rufus" ), selected = "Avahi_laniger"),
     
-    selectInput("variable","Select transect information desired", 
-                choices = c("Predicted","slope","logSeedLength",
-                            "logNitrogen"), selected = "Predicted")
+    selectInput("site","Select Site", 
+                choices = c("Ampatsoana","Maharira","Miaranony",
+                            "Valohoaka","Vohiparara","ALL"), selected = "ALL")
     )
     ))
         
@@ -51,7 +51,9 @@ server <- function(input, output) {
     filteredData <- reactive({
         data %>%
         filter(Species == input$Species)%>%
-                input$variable == "variable"})
+        filter(if(input$site != 'ALL')(Site == input$site) else TRUE)
+                })
+    
     #Define colors
     pal <- colorNumeric(
     palette = c('navy','royal blue 1','cyan', 'gold', 'dark orange', 'orange red', 'red', 'dark red'),
