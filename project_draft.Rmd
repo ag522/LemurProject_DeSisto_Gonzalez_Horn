@@ -167,6 +167,8 @@ Group                                                                           
 
 # Summary and Conclusions
 
+From our analysis there is a significant difference in Lemur population density between different species. There is also a slightly less significant difference in population density between sites. 
+
 
 \newpage
 
