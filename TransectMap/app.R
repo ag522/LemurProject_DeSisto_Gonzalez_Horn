@@ -16,42 +16,48 @@ data <- data %>%
     mutate(Transect_Site2 = Transect_Site) %>%
     separate(col= Transect_Site2, into="Site", sep ="_") 
 
-# Define UI for application that draws a histogram
+# Define UI for application 
 ui <- fluidPage( #shinythemes::themeSelector(),
 
     # Application title
     titlePanel("Transect Site Information"),
-    
+  
     sidebarLayout(
         
         mainPanel(
+          #Create Map output
     leafletOutput(outputId="mymap"),
+    #Create space between map and graph outputs
     br(),
     br(),
     br(),
     br(),
+    #Create graph output
     plotOutput("scatterplot" , brush = brushOpts(id = "scatterplot_brush")),
     
-    
-    
-    
     ),
+    
     sidebarPanel(
+      #Add widget so user can select a theme
       shinythemes::themeSelector(),
+      #creates species dropdown 
     selectInput("Species","Select a Species:", 
     choices = c("Avahi_laniger","Cheirogaleus_crossleyi",
                 "Eulemur_rubriventer","Propithecus_edwardsi",
                 "Lepilemur_microdon","Hapalemur_griseus",
                  "Eulemur_rufifrons","Varecia_variegata",
                  "Microcebus_rufus" ), selected = "Eulemur_rubriventer"),
+    #Creates Lemur Image Output
     imageOutput("image"),
-    
+    #creates site dropdown 
     selectInput("site","Select Site", 
                 choices = c("Ampatsoana","Maharira","Miaranony",
                             "Valohoaka","Vohiparara","ALL"), selected = "ALL"),
+    #creates x variable dropdown 
     selectInput("X","Select X variable", 
                 choices = c("logSugar","logFat","logProtein",
                             "logNitrogen","logTannins","tpi","roughness","slope","aspect"), selected = "logSugar"),
+    # creates plot fill attribute dropdown
     selectInput("Fill","Select graph fill variable", 
                 choices = c("logSugar","logFat","logProtein",
                             "logNitrogen","logTannins","tpi","roughness","slope","aspect"), selected = "logSugar")
@@ -62,7 +68,7 @@ ui <- fluidPage( #shinythemes::themeSelector(),
         
 
 
-# Define server logic required to draw a histogram
+# Define server logic required 
 
 server <- function(input, output) {
     #Subset data based on user selection
@@ -93,7 +99,7 @@ server <- function(input, output) {
                       opacity=1)
             
             })
-    #Selects the correct Lemur image
+    #Selects  Lemur image accroding to species selected
     output$image<- renderImage({
       return(list(
         src=as.character(paste0(input$Species,".png")),
