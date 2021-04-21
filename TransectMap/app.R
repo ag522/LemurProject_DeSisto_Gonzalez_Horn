@@ -17,7 +17,7 @@ data <- data %>%
     separate(col= Transect_Site2, into="Site", sep ="_") 
 
 # Define UI for application that draws a histogram
-ui <- fluidPage( shinythemes::themeSelector(),
+ui <- fluidPage( #shinythemes::themeSelector(),
 
     # Application title
     titlePanel("Transect Site Information"),
@@ -30,10 +30,6 @@ ui <- fluidPage( shinythemes::themeSelector(),
     br(),
     br(),
     br(),
-    br(),
-    br(),
-    br(),
-    br(),
     plotOutput("scatterplot" , brush = brushOpts(id = "scatterplot_brush")),
     
     
@@ -41,12 +37,14 @@ ui <- fluidPage( shinythemes::themeSelector(),
     
     ),
     sidebarPanel(
+      shinythemes::themeSelector(),
     selectInput("Species","Select a Species:", 
     choices = c("Avahi_laniger","Cheirogaleus_crossleyi",
                 "Eulemur_rubriventer","Propithecus_edwardsi",
                 "Lepilemur_microdon","Hapalemur_griseus",
                  "Eulemur_rufifrons","Varecia_variegata",
-                 "Microcebus_rufus" ), selected = "Avahi_laniger"),
+                 "Microcebus_rufus" ), selected = "Eulemur_rubriventer"),
+    imageOutput("image"),
     
     selectInput("site","Select Site", 
                 choices = c("Ampatsoana","Maharira","Miaranony",
@@ -57,6 +55,7 @@ ui <- fluidPage( shinythemes::themeSelector(),
     selectInput("Fill","Select graph fill variable", 
                 choices = c("logSugar","logFat","logProtein",
                             "logNitrogen","logTannins","tpi","roughness","slope","aspect"), selected = "logSugar")
+   
    
     )
     ))
@@ -94,6 +93,16 @@ server <- function(input, output) {
                       opacity=1)
             
             })
+    #Selects the correct Lemur image
+    output$image<- renderImage({
+      return(list(
+        src=as.character(paste0(input$Species,".png")),
+        contentType = "image/png",
+        width = 350,
+        alt = "Lemur"))
+    
+    })
+    
     # Create a ggplot object for the type of plot you have defined in the UI  
     output$scatterplot <- renderPlot({
       ggplot(filteredData(), 
