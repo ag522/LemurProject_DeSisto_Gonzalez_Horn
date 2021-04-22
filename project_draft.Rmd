@@ -85,6 +85,7 @@ Map_Transect
 ```{r, fig.cap= "Heat map of lemur densities at each project transect site" }
 head(lemur_data)
 dim(lemur_data)
+str(lemur_data)
 
 summary(lemur_data)
 length(unique(lemur_data$Transect_Site))
@@ -122,7 +123,7 @@ trait_data2 <- lemur_data %>%
   mutate(Transect_Site2 = Transect_Site)%>%
   separate(col= Transect_Site2, into="Site", sep ="_")
 
-write.csv(trait_data2, "C:/ENV872/LemurProject_DeSisto_Gonzalez_Horn/Data/trait_data2.csv")
+write.csv(trait_data2, "C:/ENV872/LemurProject_DeSisto_Gonzalez_Horn/Data/Processed/trait_data2.csv")
 
 
 density_anova <- aov(data= trait_data2, Predicted ~ Site)
@@ -201,7 +202,9 @@ print(density_aov_plot2)
 
 # Summary and Conclusions
 
-There is a significant difference in Lemur population density between different species and between different sites.
+There is a significant difference in Lemur population density between different species and between different sites. Although Miaranony and Valohoaka have greater lemur densities than the other sites, this is likely driven by outliers. Ampatsoana, Maharira, and Vohiparara all have similar lemur densities. Eulemur rubriventer, Propithecus edwardsi, and Microcebus rufus all tend to have higher densities than the other lemur species, while Varecia variegata, Lepilemur microdon, Avahi laniger, and Cheirogaleus crossleyi tend to have lower densities. 
+
+Our analyses demonstrate that these differences are related to ______. These results highlight the potential importance of plant functional traits in driving patterns of lemur density across a landscape.  However, differences in densities could also be reflective of life history characteristic or other variables that were not included in this study, such as human disturbance.  These results could have management implications. For example, it could be beneficial to focus tree restoration efforts on species that contain the traits that are positively related to lemur densities, such as_____. Future studies ought to integrate other variables into the analysis of this question. For example, other studies could investigate how functional traits and climatic variables interact with anthropogenic disturbance to drive patterns in lemur densities. Additionally, it would be interesting to incorporate lemur functional traits to analyze if lemur diets, body sizes, and behavioral traits are significantly related to their densities in a given area. 
 
 
 
