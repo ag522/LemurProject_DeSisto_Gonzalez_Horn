@@ -117,11 +117,12 @@ density_plot <- ggplot(lemur_data, aes(x = Species, y =Transect_Site))+
 
 First, we conducted a one-way analysis of variance (ANOVA) on lemur population density by site using the "aov" function in the R general interface. Next, we completed a post-hoc Tukey HSD test to determine pairwise differences between the sites. Then, we conducted a HSD post-hoc test from the R package "agricolae" (de Mendiburu 2020) to categorize the sites into groups based on their lemur densities. After these analyses of the sites, we repeated the process between lemur species rather than sites to determine if there are significant differences in densities depending on the particular species.
  
-```{r, fig.cap="Boxplot of lemur densities at each sampling site."}
+```{r}
 trait_data2 <- lemur_data %>%
   mutate(Transect_Site2 = Transect_Site)%>%
   separate(col= Transect_Site2, into="Site", sep ="_")
- 
+
+write.csv(trait_data2, "C:/ENV872/LemurProject_DeSisto_Gonzalez_Horn/Data/trait_data2.csv")
 
 density_anova <- aov(data= trait_data2, Predicted ~ Site)
 summary(density_anova)
@@ -145,7 +146,7 @@ density_aov_plot <- ggplot(data = trait_data2, aes(x = Site, y = Predicted))+
 ```
 
 
-```{r , fig.cap="Boxplot of lemur densities for each species surveyed."}
+```{r}
 density_anova2 <- aov(data= trait_data2, Predicted ~ Species)
 summary(density_anova2)
 
@@ -157,7 +158,7 @@ anova_groups2 <- HSD.test(density_anova2, "Species", group=TRUE)
 # the lemur species fall into four groups according to their densities 
 #What is interesting is that the groups do not seem to be organized by taxonomic family, body size, or whether they are nocturnal. diurnal
 
-density_aov_scatterplot <- ggplot(data = trait_data2, aes(x = reorder(Species, Predicted, FUN = median), y = Predicted))+
+density_aov_plot2 <- ggplot(data = trait_data2, aes(x = reorder(Species, Predicted, FUN = median), y = Predicted))+
   geom_boxplot()+
   ylab("Lemur Density (N Individuals/"~(Km^2))+
   xlab("Species")+
@@ -167,14 +168,15 @@ density_aov_scatterplot <- ggplot(data = trait_data2, aes(x = reorder(Species, P
   
 ```
 
+>>>>>>> 82a58ecfeb4a4ed275c40ab5a8bfb29d48be0242
+## Question 2: What variables are related to differences in lemur densities? 
 
 
 <<<<<<< HEAD
 =======
-## Question 1: Is there a significan difference between lemur population densities between sites or species? 
+#Results
 
-There is a significant difference in lemur densities between different sites (F(4,254) = 3.469, p = 0.009). In particular, a post-hoc Tukey HSD test revealed that there are significant differences in densities between Miaranony and Ampatsoana (p = 0.0287), Miaranony and Maharira (p = 0.031) and Vohiparara and Miaranony (p = 0.386) sites. However, visual analysis of lemur densities via boxplots boxplots (figure 1) suggests that the higher lemur densities observed in  Miaranony and Valohoaka are the result of outliers. An HSD post-hoc test from the R package "agricolae" (de Mendiburu 2020) indicates that the sites can be categorized into two main groups according to their lemur densities, with Miaranony in one group, Vohiparara, Ampatsona, and Maharira in another group, and Valohoaka in both groups. 
-Next, we conducted a second one-way analysis of variance (ANOVA) on lemur population density by species. There is a significant difference in lemur densities between different species (F (8,250) = 16.79, p = <2e-16). The HSD post-hoc test indicates that lemur species can be categorized into four main groups according to their density:
+There is a significant difference in lemur densities between different sites (F(4,254) = 3.469, p = 0.009). In particular, a post-hoc Tukey HSD test revealed that there are significant differences in densities between Miaranony and Ampatsoana (p = 0.0287), Miaranony and Maharira (p = 0.031) and Vohiparara and Miaranony (p = 0.386) sites. However, visual analysis of lemur densities via boxplots boxplots (figure 1) suggests that the higher lemur densities observed in  Miaranony and Valohoaka are the result of outliers. An HSD post-hoc test from the R package "agricolae" (de Mendiburu 2020) indicates that the sites can be categorized into two main groups according to their lemur densities, with Miaranony in one group, Vohiparara, Ampatsona, and Maharira in another group, and Valohoaka in both groups. There is also a significant difference in lemur densities between different species (F (8,250) = 16.79, p = <2e-16). The HSD post-hoc test indicates that lemur species can be categorized into four main groups according to their density:
 
 Group                                                                                                     | Average population Density
 ------------------------------|---------------------------------------------------------------------------|-----------------------------
@@ -183,9 +185,14 @@ Group                                                                           
 - *Eulemur rufifrons* ,*Hapalemur griseus*                                                                | 1.11 - 2.31
 - *Hapalemur griseus*,*Varecia variegata *,*Cheirogaleus crossleyi*,*Avahi laniger *,*Lepilemur microdon* | 0.24 - 1.11
 
->>>>>>> 82a58ecfeb4a4ed275c40ab5a8bfb29d48be0242
-## Question 2: What variables are related to differences in lemur densities? 
 
+```{r, fig.cap="Boxplot of lemur densities at each sampling site." }
+print(density_aov_plot)
+```
+
+```{r , fig.cap="Boxplot of lemur densities for each species surveyed."}
+print(density_aov_plot2)
+```
 
 
 
@@ -193,7 +200,8 @@ Group                                                                           
 
 # Summary and Conclusions
 
-There is a significant difference in Lemur population density between different species and between different sites. 
+There is a significant difference in Lemur population density between different species and between different sites.
+
 
 
 \newpage
