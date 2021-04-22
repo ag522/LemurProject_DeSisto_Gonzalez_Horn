@@ -124,6 +124,7 @@ trait_data2 <- lemur_data %>%
 
 write.csv(trait_data2, "C:/ENV872/LemurProject_DeSisto_Gonzalez_Horn/Data/trait_data2.csv")
 
+
 density_anova <- aov(data= trait_data2, Predicted ~ Site)
 summary(density_anova)
 
