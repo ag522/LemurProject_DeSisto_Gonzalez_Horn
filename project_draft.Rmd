@@ -26,6 +26,9 @@ mainfont: Times New Roman
 getwd()
 # Load your packages
 library(lme4)
+require(lmerTest)
+require(lmtest)
+library(corrplot)
 library(dplyr)
 library(tidyverse)
 library(ggplot2)
@@ -33,6 +36,9 @@ library(agricolae)
 library(sf)
 library(leaflet)
 library(mapview)
+library(MuMIn)
+library(htmltools)
+library(agricolae)
 # Set your ggplot theme
 # Load your datasets
 lemur_data <- read.csv("872_data.csv", header=T)
@@ -142,9 +148,132 @@ density_aov_scatterplot <- ggplot(data = trait_data2, aes(x = reorder(Species, P
 
 
 
-## Question 1: <insert specific question here and add additional subsections for additional questions below, if needed>
+## Question 1: Which landscape-level characteristics and plant functional traits influence lemur density?
 
-## Question 2: 
+```{r}
+#More analyses using linear models
+traitdata_subset <- select(trait_data2, logFruitLength:logSLA, Predicted, slope, aspect, lat, long)
+lemur_density_Corr <- cor(traitdata_subset)
+corrplot(lemur_density_Corr, method = "ellipse")
+#The correlation plot matrix indicates that there are slight positive correlations between our response variable (Predicted) and multiple explanatory variables.
+
+Fruit_trait_plot <- ggplot(traitdata_subset, aes(x = logFruitLength, y = Predicted, color = logNitrogen)) +
+  geom_point()
+print(Fruit_trait_plot)
+# plot to visually explore the relationship between some of fruit trait variables that stood out in the correlation plot matrix and lemur density
+
+Fruit_trait_nutrient_plot2 <- ggplot(traitdata_subset, aes(x = logProtein, y = Predicted, color = logTannins)) +
+  geom_point()
+print(Fruit_trait_nutrient_plot2)
+# plot to visually explore the relationship between two other fruit trait variables that stood out in the correlation plot matrix and lemur density
+
+#Creating a linear model with random effects
+lemur_dens_lmer1 <- lmer(data = trait_data2, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + Site + logFruitLength + logFat + aspect + logFruitWidth + logProtein + (1|Species) + (1|Transect_Site))
+summary(lemur_dens_lmer1)
+
+#Checking whether the linear model conforms to the assumptions of linear models
+par(mfrow = c(2,2), mar=c(4,4,4,4))
+plot(lmer_Species_TS1)
+par(mfrow = c(1,1))
+#There appears to be a balance of positive and negative residuals, which is a good sign. However, there appears to be a strange pattern of three seperate lines with negative slopes
+
+qqnorm(trait_data2$Predicted); qqline(trait_data2$Predicted)
+#This qqplot provides information on the normality of the response variable. The data doesn't follow a normal distribution that well, but I don't think its terrible
+
+#Reducing the linear model using the step function
+step(lmer_Species_TS1)
+#The step function found that Predicted ~ logNitrogen + lat + roughness + slope + Site + logFruitLength + logFruitWidth + (1 | Species) is the best model
+
+
+step_model <- lmer(data = trait_data2, Predicted ~ logNitrogen + lat + roughness + slope + Site + logFruitLength + logFruitWidth + (1 | Species))
+summary(step_model)
+#The model produced by the step function indicates that logNitrogen, lat, roughness, slope, SiteMaharira, SiteMiaranony, SiteValohoaka, SiteVohiparara, logFruitLength, and logFruitWidth are significant variables
+
+#Reducing the linear model manually
+lemur_dens_lmer2 <- update(lemur_dens_lmer1,~.-logSLA)
+summary(lemur_dens_lmer2)
+
+lemur_dens_lmer3 <- update(lemur_dens_lmer2,~.-logSeedLength)
+summary(lemur_dens_lmer3)
+
+lemur_dens_lmer4 <- update(lemur_dens_lmer3,~.-aspect)
+summary(lemur_dens_lmer4)
+
+lemur_dens_lmer5 <- update(lemur_dens_lmer4,~.-logTannins)
+summary(lemur_dens_lmer5)
+
+lemur_dens_lmer6 <- update(lemur_dens_lmer5,~.-logSeedWidth)
+summary(lemur_dens_lmer6)
+
+lemur_dens_lmer7 <- update(lemur_dens_lmer6,~.-logProtein)
+summary(lemur_dens_lmer7)
+
+lemur_dens_lmer8 <- update(lemur_dens_lmer7,~.-logFat)
+summary(lemur_dens_lmer8)
+
+lemur_dens_lmer9 <- update(lemur_dens_lmer8,~.-logSugar)
+summary(lemur_dens_lmer9)
+
+lemur_dens_lmer10 <- update(lemur_dens_lmer9,~.-long)
+summary(lemur_dens_lmer10)
+
+lemur_dens_lmer11 <- update(lemur_dens_lmer10,~.-SiteMiaranony)
+summary(lemur_dens_lmer11)
+
+lrtest(lemur_dens_lmer6, lemur_dens_lmer7, lemur_dens_lmer8, lmer_Species_TS9, lemur_dens_lmer10)
+AIC(lemur_dens_lmer6, lemur_dens_lmer7, lemur_dens_lmer8, lmer_Species_TS9, lemur_dens_lmer10)
+#models 6 and 7 seem to have the lowest AICs, but model 10 has only significant variables, so it is the one I have selected
+r.squaredGLMM(lemur_dens_lmer7)
+r.squaredGLMM(lemur_dens_lmer8)
+r.squaredGLMM(lemur_dens_lmer9)
+r.squaredGLMM(lemur_dens_lmer10)
+#lemur_dens_lmer_10 explains 46% of density
+
+#checking the residuals of the final linear model
+par(mfrow = c(2,2), mar=c(4,4,4,4))
+plot(lmer_Species_TS10)
+par(mfrow = c(1,1))
+
+#Exploring drivers of density for individual species
+AL_subset <- filter(trait_data2, Species == "Avahi_laniger")
+
+AL_lm_1 <- lm(data = AL_subset, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + Site + logFruitLength + logFat + aspect + logFruitWidth + logProtein)
+summary(AL_lm_1)
+
+AL_lm_2 <- update(AL_lm_1,~.-logSugar)
+summary(AL_lm_2)
+
+AL_lm_3 <- update(AL_lm_2,~.-logTannins)
+summary(AL_lm_3)
+
+AL_lm_4 <- update(AL_lm_3,~.-aspect)
+summary(AL_lm_4)
+
+AL_lm_5 <- update(AL_lm_4,~.-logNitrogen)
+summary(AL_lm_5)
+
+AL_lm_6 <- update(AL_lm_5,~.-roughness)
+summary(AL_lm_6)
+
+AL_lm_7 <- update(AL_lm_6,~.-slope)
+summary(AL_lm_7)
+
+AL_lm_8 <- update(AL_lm_7,~.-logProtein)
+summary(AL_lm_8)
+
+AL_lm_9 <- update(AL_lm_8,~.-logFat)
+summary(AL_lm_9)
+
+AL_lm_10 <- update(AL_lm_9,~.-long)
+summary(AL_lm_10)
+
+AIC(AL_lm_2, AL_lm_3, AL_lm_4, AL_lm_5, AL_lm_6, AL_lm_7, AL_lm_8, AL_lm_9, AL_lm_10)
+#AL_lm_7 has the lowest AIC, and explains 82% of the variation of Avahi laniger densities 
+#AL_lm_10 has only significant variables, and explains 79% of the variation of Avahi laniger densities
+```
+
+
+## Question 2: Which landscape-level characteristics and plant functional traits influence density of individual lemur species?
 
 
 
