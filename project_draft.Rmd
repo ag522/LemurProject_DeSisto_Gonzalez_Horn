@@ -341,7 +341,7 @@ There is a significant difference in Lemur population density between different 
 
 Our analyses demonstrate that these differences are related to ______. These results highlight the potential importance of plant functional traits in driving patterns of lemur density across a landscape.  However, differences in densities could also be reflective of life history characteristic or other variables that were not included in this study, such as human disturbance.  These results could have management implications. For example, it could be beneficial to focus tree restoration efforts on species that contain the traits that are positively related to lemur densities, such as_____. Future studies ought to integrate other variables into the analysis of this question. For example, other studies could investigate how functional traits and climatic variables interact with anthropogenic disturbance to drive patterns in lemur densities. Additionally, it would be interesting to incorporate lemur functional traits to analyze if lemur diets, body sizes, and behavioral traits are significantly related to their densities in a given area. 
 
-
+x
 
 \newpage
 
