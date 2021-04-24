@@ -39,6 +39,7 @@ library(mapview)
 library(MuMIn)
 library(htmltools)
 library(agricolae)
+library(knitr)
 # Set your ggplot theme
 # Load your datasets
 lemur_data <- read.csv("872_data.csv", header=T, stringsAsFactors = TRUE)
@@ -58,19 +59,14 @@ In this project, we examine a suite of environmental factors in relation to lemu
 \newpage
 
 # Dataset Information
-Data for this project were collected by James Herrera and Camille DeSisto, as a part of a larger project aimed at investigating plant-animal interactions in Madagascar's eastern rainforests. Field data were collected by James Herrera and his colleagues in the montane evergreen rainforest of Ranomafana National Park in southwestern Madagascar. They conducted diurnal and nocturnal lemur surveys at five sites (Ampatsoana, Maharira, Miaranony, Valohoaka, and Vohiparara) between 2011 and 2014. Diurnal lemur surveys were conducted at 31 transects among these five sites, whereas nocturnal lemur surveys were conducted at 26 of these sites due to logistical constraints. Habitat variables (slope, roughness, location, topogaphic position index, elevation, flow direction, and aspect) were collected along each transects. Additionally, vegetation data were collected from botanical surveys every 100 m along each transect. Camille DeSisto calculated lemur densities using a distance sampling and model averaging approach that jointly modeled for detection and density, using the R packages "unmarked" and "MuMln" (Fiske & Chandler 201; Barton 2020). Trait data were previously collected from the literature and mean trait values were calculated for each transect as part of the larger research project. Upon the start of this final project, the dataset was already clean and did not require additional wrangling to be used for our spatial visualization or linear models. However, we did use data wangling to summarise the transects by group in order to conduct the analysis of variance. We also created a Transect Map App to better visualize the data by species and site as well as allowing the user to select a variable and visualize it's relationship with population density for a particular species per site.
-
-
-
-```
-
+Data for this project were collected by James Herrera and Camille DeSisto, as a part of a larger project aimed at investigating plant-animal interactions in Madagascar's eastern rainforests. Field data were collected by James Herrera and his colleagues in the montane evergreen rainforest of Ranomafana National Park in southwestern Madagascar. They conducted diurnal and nocturnal lemur surveys at five sites (Ampatsoana, Maharira, Miaranony, Valohoaka, and Vohiparara) between 2011 and 2014. Diurnal lemur surveys were conducted at 31 transects among these five sites, whereas nocturnal lemur surveys were conducted at 26 of these sites due to logistical constraints. Habitat variables (slope, roughness, location, topogaphic position index, elevation, flow direction, and aspect) were collected along each transects. Additionally, vegetation data were collected from botanical surveys every 100 m along each transect. Camille DeSisto calculated lemur densities using a distance sampling and model averaging approach that jointly modeled for detection and density, using the R packages "unmarked" and "MuMln" (Fiske & Chandler 201; Barton 2020; Figure 1). Trait data were previously collected from the literature and mean trait values were calculated for each transect as part of the larger research project. Upon the start of this final project, the dataset was already clean and did not require additional wrangling to be used for our spatial visualization or linear models. However, we did use data wangling to summarise the transects by group in order to conduct the analysis of variance. In total, there are 11 plant functional trait variables and 5 habitat variables per transect, in addition to the predicted densities per lemur species (Table 1). Additionally information on the variables is available in the metedata file in the Github repository. We also created a Transect Map App to better visualize the data by species and site as well as allowing the user to select a variable and visualize it's relationship with population density for a particular species per site.
 
 
 \newpage
 
 # Exploratory Analysis 
 
-```{r, fig.cap= "Heat map of lemur densities at each project transect site" }
+```{r, fig.cap= "Figure 1. Heat map of lemur densities at each project transect site" }
 head(lemur_data)
 dim(lemur_data)
 str(lemur_data)
@@ -90,6 +86,96 @@ density_plot <- ggplot(lemur_data, aes(x = Species, y =Transect_Site))+
   theme(axis.text.x=element_text(angle = 30, hjust=1))+
   ylab("Transect")+
   labs(fill="Individual Density")
+
+```
+```{r}
+transect_variables_mean <- lemur_data %>%
+  summarise(LogFruitLength = mean(logFruitLength),
+            LogFruitWidth = mean(logFruitWidth),
+            LogSeedLength = mean(logSeedLength),
+          LogSeedWidth = mean(logSeedWidth),
+            LogSugar = mean(logSugar),
+            LogFat = mean(logFat),
+            LogProtein = mean(logProtein),
+            LogNitrogen = mean(logNitrogen),
+            LogTannins = mean(logTannins),
+            SLA= mean(logSLA),
+            WD= mean(WD),
+            Tpi= mean(tpi),
+            Roughness = mean(roughness),
+            Slope = mean(slope),
+            Aspect = mean(aspect),
+            Flowdir = mean(flowdir),
+          Density = mean(Predicted)
+            )
+
+transect_variables_max <- lemur_data %>%
+  summarise(LogFruitLength = max(logFruitLength),
+            LogFruitWidth = max(logFruitWidth),
+            LogSeedLength = max(logSeedLength),
+            LogSeedWidth = max(logSeedWidth),
+            LogSugar = max(logSugar),
+            LogFat = max(logFat),
+            LogProtein = max(logProtein),
+          LogNitrogen = max(logNitrogen),
+            LogTannins = max(logTannins),
+            SLA= max(logSLA),
+            WD= max(WD),
+            Tpi=max(tpi),
+            Roughness = max(roughness),
+            Slope = max(slope),
+            Aspect = max(aspect),
+            Flowdir =max(flowdir),
+           Density = max(Predicted)
+            )
+
+transect_variables_min <- lemur_data %>%
+  summarise(LogFruitLength = min(logFruitLength),
+            LogFruitWidth = min(logFruitWidth),
+            LogSeedLength = min(logSeedLength),
+            LogSeedWidth = min(logSeedWidth),
+          LogSugar = min(logSugar),
+            LogFat = min(logFat),
+            LogProtein = min(logProtein),
+            LogNitrogen = min(logNitrogen),
+            LogTannins = min(logTannins),
+            SLA= min(logSLA),
+            WD= min(WD),
+            Tpi=min(tpi),
+            Roughness = min(roughness),
+            Slope = min(slope),
+            Aspect = min(aspect),
+            Flowdir =min(flowdir),
+           Density = min(Predicted)
+            )
+
+transect_variables_sd <- lemur_data %>%
+  summarise(LogFruitLength = sd(logFruitLength),
+          LogFruitWidth = sd(logFruitWidth),
+          LogSeedLength = sd(logSeedLength),
+            LogSeedWidth = sd(logSeedWidth),
+          LogSugar = sd(logSugar),
+            LogFat = sd(logFat),
+            LogProtein = sd(logProtein),
+            LogNitrogen = sd(logNitrogen),
+            LogTannins = sd(logTannins),
+            SLA= sd(logSLA),
+            WD= sd(WD),
+            Tpi=sd(tpi),
+            Roughness = sd(roughness),
+            Slope = sd(slope),
+            Aspect = sd(aspect),
+            Flowdir =sd(flowdir),
+           Density = sd(Predicted)
+            )
+
+transect_variables_summary <- rbind(transect_variables_max, transect_variables_min, transect_variables_mean, transect_variables_sd)
+stats <- c("Maximum", "Minimum", "Mean", "Standard Deviation")
+transect_variables_summary<- cbind(stats, transect_variables_summary)
+transect_variables_summary <- data.frame(t(transect_variables_summary[-1]))
+colnames(transect_variables_summary) <- c("Maximum", "Minimum", "Mean", "Standard Deviation")
+
+kable(transect_variables_summary, caption ="Summary Statistics for Transect-Level Variables")
 
 ```
 
