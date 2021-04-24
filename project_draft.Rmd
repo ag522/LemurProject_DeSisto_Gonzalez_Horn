@@ -428,7 +428,7 @@ LM_lm_2 <- update(LM_lm_1,~.-logSugar)
 summary(LM_lm_2)
 
 LM_lm_2b <- update(LM_lm_2,~.-Site)
-summary(LM_lm_idk)
+summary(LM_lm_2b)
 
 LM_lm_3 <- update(LM_lm_2,~.-lat)
 summary(LM_lm_3)
