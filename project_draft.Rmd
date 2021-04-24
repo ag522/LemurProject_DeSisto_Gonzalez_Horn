@@ -179,15 +179,9 @@ density_aov_plot2 <- ggplot(data = trait_data2, aes(x = reorder(Species, Predict
 >>>>>>> 82a58ecfeb4a4ed275c40ab5a8bfb29d48be0242
 ## Question 2: What variables are related to differences in lemur densities? 
 
+Next,analyzed what transect-level habitat variables are significantly related to lemur densities. After an exploratory correlation plot to determine the correlations between the habitat variables, we conducted linear mixed effects models using the "lmer" function in the R package "lme4" (Bates et al. 2015). We used lemur density as the dependent variable, site-level habitat characteristics (log fruit length, log fruit width, log seed length, log seed width, log fruit nitrogen content, log tree tannin content, log fruit sugar content, log fruit sugar content, log fruit protein content, latitude, longitude, aspect, slope, and roughness) as the independent variables, and the transects and lemur species as random variables. We used a backward stepwise approach to reduce the models and conducted model selection via comparison of their Akaike Information Criterion (AIC) values using the "lrtest" function in the R package "lmtest" (Zeileis & Horton 2002). Additionally, we identified the R-squared values of the models using the "r.squaredGLMM" function in the R package "MuMln" (Barton 2020). Next, to explore the effects of habitat varaibles for specific lemur species, we subset the data by species and conducted linear models for three lemur species (Eulemur rubriventer, Propithecus edwardsi, and Lepilemur microdon) using the function "lm" from the R general interface. We used density as the dependent variable and the aforementioned habitat variables as independent variables. We chose to focus on these three lemur species as case studies because we identified them as having distinct densities based on the ANOVA and exploratory data analysis. 
 
-<<<<<<< HEAD
-=======
-#Results
 
-There is a significant difference in lemur densities between different sites (F(4,254) = 3.469, p = 0.009). In particular, a post-hoc Tukey HSD test revealed that there are significant differences in densities between Miaranony and Ampatsoana (p = 0.0287), Miaranony and Maharira (p = 0.031) and Vohiparara and Miaranony (p = 0.386) sites. However, visual analysis of lemur densities via boxplots boxplots (figure 1) suggests that the higher lemur densities observed in  Miaranony and Valohoaka are the result of outliers. An HSD post-hoc test from the R package "agricolae" (de Mendiburu 2020) indicates that the sites can be categorized into two main groups according to their lemur densities, with Miaranony in one group, Vohiparara, Ampatsona, and Maharira in another group, and Valohoaka in both groups. There is also a significant difference in lemur densities between different species (F (8,250) = 16.79, p = <2e-16). The HSD post-hoc test indicates that lemur species can be categorized into four main groups according to their density:
-
-<<<<<<< HEAD
-## Question 1: Which landscape-level characteristics and plant functional traits influence lemur density?
 
 ```{r}
 #More analyses using linear models
@@ -494,9 +488,12 @@ AIC(LM_lm_1, LM_lm_2, LM_lm_2b, LM_lm_3, LM_lm_4, LM_lm_5, LM_lm_6, LM_lm_7, LM_
 
 ```
 
-
-## Question 2: Which landscape-level characteristics and plant functional traits influence density of individual lemur species?
+<<<<<<< HEAD
 =======
+#Results
+
+There is a significant difference in lemur densities between different sites (F(4,254) = 3.469, p = 0.009). In particular, a post-hoc Tukey HSD test revealed that there are significant differences in densities between Miaranony and Ampatsoana (p = 0.0287), Miaranony and Maharira (p = 0.031) and Vohiparara and Miaranony (p = 0.386) sites. However, visual analysis of lemur densities via boxplots boxplots (figure 1) suggests that the higher lemur densities observed in  Miaranony and Valohoaka are the result of outliers. An HSD post-hoc test from the R package "agricolae" (de Mendiburu 2020) indicates that the sites can be categorized into two main groups according to their lemur densities, with Miaranony in one group, Vohiparara, Ampatsona, and Maharira in another group, and Valohoaka in both groups. There is also a significant difference in lemur densities between different species (F (8,250) = 16.79, p = <2e-16). The HSD post-hoc test indicates that lemur species can be categorized into four main groups according to their density:
+
 Group                                                                                                     | Average population Density
 ------------------------------|---------------------------------------------------------------------------|-----------------------------
 - *Eulemur rubriventer*,*Propithecus edwardsi*,*Microcebus rufus*                                         | 2.72 - 3.80
@@ -514,7 +511,7 @@ print(density_aov_plot)
 print(density_aov_plot2)
 ```
 
-
+Our best model, which contained all significant variables and was within 4 AIC values of the model with the lowest AIC, demonstrates that fruit nitrogen content, fruit length, and fruit width were significantly related to lemur density. With every increase in one percentage of nitrogen on the log scale, 
 
 \newpage
 
