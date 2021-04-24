@@ -262,7 +262,7 @@ summary(lemur_dens_lmer11)
 lrtest(lemur_dens_lmer6, lemur_dens_lmer7, lemur_dens_lmer8, lemur_dens_lmer9, lemur_dens_lmer10)
 AIC(lemur_dens_lmer6, lemur_dens_lmer7, lemur_dens_lmer8, lemur_dens_lmer9, lemur_dens_lmer10)
 #models 6 and 7 seem to have the lowest AICs
-#I select either model 8
+#I select model 8
 #the significant variables of lemur_dens_8 are logNitrogen, lat, roughness, slope, SiteMaharira, SiteValohoaka, SiteVohiparara, logFruitLength, and logFruitWidth
 
 r.squaredGLMM(lemur_dens_lmer8)
