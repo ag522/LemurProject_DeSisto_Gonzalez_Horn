@@ -41,6 +41,10 @@ library(htmltools)
 library(agricolae)
 library(knitr)
 # Set your ggplot theme
+mytheme <- theme_classic(base_size = 12) +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "bottom")
+theme_set(mytheme)
 # Load your datasets
 lemur_data <- read.csv("872_data.csv", header=T, stringsAsFactors = TRUE)
 
@@ -86,6 +90,8 @@ density_plot <- ggplot(lemur_data, aes(x = Species, y =Transect_Site))+
   theme(axis.text.x=element_text(angle = 30, hjust=1))+
   ylab("Transect")+
   labs(fill="Individual Density")
+
+density_plot
 
 ```
 ```{r}
@@ -175,7 +181,7 @@ transect_variables_summary<- cbind(stats, transect_variables_summary)
 transect_variables_summary <- data.frame(t(transect_variables_summary[-1]))
 colnames(transect_variables_summary) <- c("Maximum", "Minimum", "Mean", "Standard Deviation")
 
-kable(transect_variables_summary, caption ="Summary Statistics for Transect-Level Variables")
+kable(transect_variables_summary, caption ="Table 1. Summary Statistics for Transect-Level Variables")
 
 ```
 
@@ -247,8 +253,318 @@ density_aov_plot2 <- ggplot(data = trait_data2, aes(x = reorder(Species, Predict
 >>>>>>> 82a58ecfeb4a4ed275c40ab5a8bfb29d48be0242
 ## Question 2: What variables are related to differences in lemur densities? 
 
-Next,analyzed what transect-level habitat variables are significantly related to lemur densities. After an exploratory correlation plot to determine the correlations between the habitat variables, we conducted linear mixed effects models using the "lmer" function in the R package "lme4" (Bates et al. 2015). We used lemur density as the dependent variable, site-level habitat characteristics (log fruit length, log fruit width, log seed length, log seed width, log fruit nitrogen content, log tree tannin content, log fruit sugar content, log fruit sugar content, log fruit protein content, latitude, longitude, aspect, slope, and roughness) as the independent variables. We conducted these models with the transect as the random variable, the lemur species as the random variable, and both the transect and the lemur species as random variables. We used a backward stepwise approach to reduce the models and conducted model selection via comparison of their Akaike Information Criterion (AIC) values using the "lrtest" function in the R package "lmtest" (Zeileis & Horton 2002). Additionally, we identified the R-squared values of the models using the "r.squaredGLMM" function in the R package "MuMln" (Barton 2020). Next, to explore the effects of habitat varaibles for specific lemur species, we subset the data by species and conducted linear models for three lemur species (Eulemur rubriventer, Propithecus edwardsi, and Lepilemur microdon) using the function "lm" from the R general interface. We used density as the dependent variable and the aforementioned habitat variables as independent variables. We chose to focus on these three lemur species as case studies because we identified them as having distinct densities based on the ANOVA and exploratory data analysis. 
+Next, weanalyzed what transect-level habitat variables are significantly related to lemur densities. After an exploratory correlation plot to determine the correlations between the habitat variables, we conducted linear mixed effects models using the "lmer" function in the R package "lme4" (Bates et al. 2015). We used lemur density as the dependent variable, site-level habitat characteristics (log fruit length, log fruit width, log seed length, log seed width, log fruit nitrogen content, log tree tannin content, log fruit sugar content, log fruit sugar content, log fruit protein content, latitude, longitude, aspect, slope, and roughness) as the independent variables. We conducted these models with both the transect and the lemur species as random variables. In the first set of models we included site as an independent variable, and in a second set of models we included it as a random variable. We used a backward stepwise approach to reduce the models and conducted model selection via comparison of their Akaike Information Criterion (AIC) values using the "lrtest" function in the R package "lmtest" (Zeileis & Horton 2002). Additionally, we identified the R-squared values of the models using the "r.squaredGLMM" function in the R package "MuMln" (Barton 2020). 
 
+## Question 3: Which landscape-level characteristics and plant functional traits influence density of individual lemur species?
+
+The final step of our analyses was exploring the effects of habitat variables for specific lemur species. To do this, we subset the data by species and conducted linear models for four lemur species (Avahi laniger, Eulemur rubriventer, Propithecus edwardsi, and Lepilemur microdon) using the function "lm" from the R general interface. We used density as the dependent variable and the aforementioned habitat variables as independent variables. We chose to focus on these four lemur species as case studies because we identified them as having distinct densities based on the ANOVA and exploratory data analysis. Further, we identified Avahi laniger and Lepilemur microdon as having the two lowest mean densities of all species included in our data, and we identified Propithecus edwardsi and Eulemur rubriventer as having the two highest mean densities of all species included in our data. Therefore, analyzing these four species individually could provide us with insights into drivers of high and low densities.
+
+```{r}
+#More analyses using linear models
+traitdata_subset <- select(trait_data2, logFruitLength:logSLA, Predicted, slope, aspect, lat, long)
+lemur_density_Corr <- cor(traitdata_subset)
+corrplot(lemur_density_Corr, method = "ellipse")
+#The correlation plot matrix indicates that there are slight correlations between our response variable (Predicted) and multiple explanatory variables.
+
+
+Fruit_trait_plot <- ggplot(traitdata_subset, aes(x = logFruitLength, y = Predicted, color = logNitrogen)) +
+  geom_point()
+print(Fruit_trait_plot)
+# plot to visually explore the relationship between some of fruit trait variables that stood out in the correlation plot matrix and lemur density
+
+Fruit_trait_nutrient_plot2 <- ggplot(traitdata_subset, aes(x = logProtein, y = Predicted, color = logTannins)) +
+  geom_point()
+print(Fruit_trait_nutrient_plot2)
+# plot to visually explore the relationship between two other fruit trait variables that stood out in the correlation plot matrix and lemur density
+
+#Creating a linear model with random effects (transect site and species as random effects)
+lemur_dens_lmer1 <- lmer(data = trait_data2, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope +Site+ logFruitLength + logFat + aspect + logFruitWidth + logProtein + (1|Species) + (1|Transect_Site))
+summary(lemur_dens_lmer1)
+
+#Checking whether the linear model conforms to the assumptions of linear models
+par(mfrow = c(2,2), mar=c(4,4,4,4))
+plot(lemur_dens_lmer1)
+par(mfrow = c(1,1))
+#There appears to be a balance of positive and negative residuals, which is a good sign. However, there appears to be a strange pattern of three separate lines with negative slopes
+
+qqnorm(trait_data2$Predicted); qqline(trait_data2$Predicted)
+#This qqplot provides information on the normality of the response variable. The data doesn't follow a normal distribution that well, but I don't think its terrible
+
+
+#Reducing the linear model manually
+lemur_dens_lmer2 <- update(lemur_dens_lmer1,~.-logSLA)
+summary(lemur_dens_lmer2)
+
+lemur_dens_lmer3 <- update(lemur_dens_lmer2,~.-logSeedLength)
+summary(lemur_dens_lmer3)
+
+lemur_dens_lmer4 <- update(lemur_dens_lmer3,~.-aspect)
+summary(lemur_dens_lmer4)
+
+lemur_dens_lmer5 <- update(lemur_dens_lmer4,~.-logTannins)
+summary(lemur_dens_lmer5)
+
+lemur_dens_lmer6 <- update(lemur_dens_lmer5,~.-logSeedWidth)
+summary(lemur_dens_lmer6)
+
+lemur_dens_lmer7 <- update(lemur_dens_lmer6,~.-logProtein)
+summary(lemur_dens_lmer7)
+
+lemur_dens_lmer8 <- update(lemur_dens_lmer7,~.-logFat)
+summary(lemur_dens_lmer8)
+
+lemur_dens_lmer9 <- update(lemur_dens_lmer8,~.-logSugar)
+summary(lemur_dens_lmer9)
+
+lemur_dens_lmer10 <- update(lemur_dens_lmer9,~.-long)
+summary(lemur_dens_lmer10)
+
+lemur_dens_lmer11 <- update(lemur_dens_lmer10,~.-SiteMiaranony)
+summary(lemur_dens_lmer11)
+
+lrtest(lemur_dens_lmer6, lemur_dens_lmer7, lemur_dens_lmer8, lemur_dens_lmer9, lemur_dens_lmer10)
+AIC(lemur_dens_lmer6, lemur_dens_lmer7, lemur_dens_lmer8, lemur_dens_lmer9, lemur_dens_lmer10)
+#models 6 and 7 seem to have the lowest AICs
+#Lemur_dens_lmer8 is the best linear model
+#the significant variables of lemur_dens_8 are logNitrogen, lat, roughness, slope, SiteMaharira, SiteValohoaka, SiteVohiparara, logFruitLength, and logFruitWidth
+
+r.squaredGLMM(lemur_dens_lmer8)
+#lemur_dens_lmer8 explains 46.7% of density
+```
+
+
+```{r}
+#now creating a linear model using more random effects (site is now a random effect) to see if it fits the data better
+#Testing linear models with site as a random variable
+test <- lmer(data = trait_data2, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + logFruitLength + logFat + aspect + logFruitWidth + logProtein + (1|Species) + (1|Transect_Site) + (1|Site))
+summary(test)
+r.squaredGLMM(test)
+
+step(test)
+
+#the model below was created by the step function
+step_test_model <- lmer(data = trait_data2, Predicted ~ logNitrogen + logFruitLength + logFruitWidth + (1 | Species))
+summary(step_test_model)
+r.squaredGLMM(step_test_model)
+
+AIC(step_test_model, lemur_dens_lmer8, lemur_dens_lmer7)
+#based off of the results of the AIC, the step_test_model appears to explain the data better than the model I created manually (lemur_dens_lmer8)
+#the significant variables of the best linear model for the entire data set (step_test_model) are logNitrogen, logFruitLength, and logFruitWidth
+#the significant variables of the next best model (lemur_dens_lmer8) are logNitrogen, lat, roughness, slope, SiteSiteMaharira, SiteValohoaka, SiteVohiparara, logFruitLength, and logFruitWidth
+#Therefore, lat, roughness, slope, and site are interesting variables
+
+#checking the residuals of the final linear model for the entire data set (step_test_model)
+par(mfrow = c(2,2), mar=c(4,4,4,4))
+plot(step_test_model)
+par(mfrow = c(1,1))
+
+
+```
+\newpage
+
+
+
+<<<<<<< HEAD
+## Question 3: Which landscape-level characteristics and plant functional traits influence density of individual lemur species?
+```{r}
+#Exploring drivers of density for individual species though the use of linear models
+#I will explore the drivers of density for the two species with the greatest densities and the two species with the lowest densities
+
+checking_lemur_densities <-
+  trait_data2 %>% 
+  group_by(Species) %>% 
+  summarize(mean(Predicted))
+
+#Avahi_laniger and Lepilemur_microdon are the species with the lowest predicted densities. Eulemur_rubriventer and Propithecus_edwardsi are the species with the highest predicted densities. 
+#I will create linear models for each of these four species to analyze species specific drivers of density
+
+AL_subset <- filter(trait_data2, Species == "Avahi_laniger")
+
+AL_lm_1 <- lm(data = AL_subset, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + Site + logFruitLength + logFat + aspect + logFruitWidth + logProtein)
+summary(AL_lm_1)
+
+AL_lm_2 <- update(AL_lm_1,~.-logSugar)
+summary(AL_lm_2)
+
+AL_lm_3 <- update(AL_lm_2,~.-logTannins)
+summary(AL_lm_3)
+
+AL_lm_4 <- update(AL_lm_3,~.-aspect)
+summary(AL_lm_4)
+
+AL_lm_5 <- update(AL_lm_4,~.-logNitrogen)
+summary(AL_lm_5)
+
+AL_lm_6 <- update(AL_lm_5,~.-roughness)
+summary(AL_lm_6)
+
+AL_lm_7 <- update(AL_lm_6,~.-slope)
+summary(AL_lm_7)
+
+AL_lm_8 <- update(AL_lm_7,~.-logProtein)
+summary(AL_lm_8)
+
+AL_lm_9 <- update(AL_lm_8,~.-logFat)
+summary(AL_lm_9)
+
+AL_lm_10 <- update(AL_lm_9,~.-long)
+summary(AL_lm_10)
+
+AIC(AL_lm_2, AL_lm_3, AL_lm_4, AL_lm_5, AL_lm_6, AL_lm_7, AL_lm_8, AL_lm_9, AL_lm_10)
+#AL_lm_7 has the lowest AIC, and explains 82% of the variation of Avahi laniger densities 
+#AL_lm_10 has only significant variables, and explains 79% of the variation of Avahi laniger densities
+#I selected model AL_lm_10
+#logSeedLength, lat, logSeedWidth, logSLA, SiteMaharira, SiteMiaranony, SiteValohoaka, SiteVohiparara, logFruitLength, and logFruitWidth are significant variables
+
+ER_subset <- filter(trait_data2, Species == "Eulemur_rubriventer")
+
+ER_lm_1 <- lm(data = ER_subset, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + Site + logFruitLength + logFat + aspect + logFruitWidth + logProtein)
+summary(ER_lm_1)
+
+ER_lm_2 <- update(ER_lm_1,~.-aspect)
+summary(ER_lm_2)
+
+ER_lm_3 <- update(ER_lm_2,~.-logFat)
+summary(ER_lm_3)
+
+ER_lm_4 <- update(ER_lm_3,~.-logNitrogen)
+summary(ER_lm_4)
+
+ER_lm_5 <- update(ER_lm_4,~.-logProtein)
+summary(ER_lm_5)
+
+ER_lm_6 <- update(ER_lm_5,~.-roughness)
+summary(ER_lm_6)
+
+
+ER_lm_7 <- update(ER_lm_6,~.-logSLA)
+summary(ER_lm_7)
+
+
+ER_lm_8 <- update(ER_lm_7,~.-logSugar)
+summary(ER_lm_8)
+
+
+ER_lm_9 <- update(ER_lm_8,~.-logSeedLength)
+summary(ER_lm_9)
+
+ER_lm_10 <- update(ER_lm_9,~.-long)
+summary(ER_lm_10)
+
+ER_lm_11 <- update(ER_lm_10,~.-logSeedWidth)
+summary(ER_lm_11)
+
+ER_lm_12 <- update(ER_lm_11,~.-logTannins)
+summary(ER_lm_12)
+#all variables are significant
+
+AIC(ER_lm_1, ER_lm_2, ER_lm_3, ER_lm_4, ER_lm_5, ER_lm_6, ER_lm_7, ER_lm_8, ER_lm_9, ER_lm_10, ER_lm_11, ER_lm_12)
+#7, 8, and 9 have has the lowest AIC
+summary(ER_lm_7)
+summary(ER_lm_8)
+summary(ER_lm_9)
+summary(ER_lm_10)
+#I selected ER_lm_9 because it had the best combination of a low AIC value and all significant variables (it had the lowest AIC and all significant variables, except for two marginally significant ones)
+#lat, logseed width, logtannins, long (marginally), slope, SiteMaharira, SiteMiaranony, SiteValohoaka (marginally), SiteVohiparara, logFruitLength, logFruitWidth are significant
+#this model explains 79% of the y variable!
+
+#Propithecus_edwardsi has the second highest density
+PE_subset <- filter(trait_data2, Species == "Propithecus_edwardsi")
+
+PE_lm_1<- lm(data = PE_subset, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + Site + logFruitLength + logFat + aspect + logFruitWidth + logProtein)
+summary(PE_lm_1)
+
+PE_lm_2 <- update(PE_lm_1,~.-aspect)
+summary(PE_lm_2)
+
+
+PE_lm_3 <- update(PE_lm_2,~.-logFat)
+summary(PE_lm_3)
+
+PE_lm_4 <- update(PE_lm_3,~.-logNitrogen)
+summary(PE_lm_4)
+
+PE_lm_5 <- update(PE_lm_4,~.-roughness)
+summary(PE_lm_5)
+
+
+PE_lm_6 <- update(PE_lm_5,~.-logProtein)
+summary(PE_lm_6)
+
+PE_lm_7 <- update(PE_lm_6,~.-slope)
+summary(PE_lm_7)
+
+PE_lm_8 <- update(PE_lm_7,~.-logSLA)
+summary(PE_lm_8)
+
+PE_lm_9 <- update(PE_lm_8,~.-logSugar)
+summary(PE_lm_9)
+
+PE_lm_10 <- update(PE_lm_9,~.-logSeedLength)
+summary(PE_lm_10)
+
+AIC(PE_lm_1, PE_lm_2, PE_lm_3, PE_lm_4, PE_lm_5, PE_lm_6, PE_lm_7, PE_lm_8, PE_lm_9, PE_lm_10)
+#PE_lm 9 and 10 have the lowest and therefore the best AIC scores
+#I decided that PE_lm_10 is the best model, because it only contains significant variables
+summary(PE_lm_10)
+#lat, logseedwidth, logtannins, long, siteMaharira, SiteMiaranony, SiteValohoaka, SiteVohiparara, logFruitLength, and logFruitWidth are the significant variables
+
+#Lepilemur_microdon has the lowest average density of all of the lemurs analyzed
+LM_subset <- filter(trait_data2, Species == "Lepilemur_microdon")
+
+LM_lm_1<- lm(data = LM_subset, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + Site + logFruitLength + logFat + aspect + logFruitWidth + logProtein)
+summary(LM_lm_1)
+#Woa, this has an adjusted r squared value of 96.5!
+step(LM_lm_1)
+
+LM_lm_2 <- update(LM_lm_1,~.-logSugar)
+summary(LM_lm_2)
+
+LM_lm_2b <- update(LM_lm_2,~.-Site)
+summary(LM_lm_2b)
+
+LM_lm_3 <- update(LM_lm_2,~.-lat)
+summary(LM_lm_3)
+
+LM_lm_4 <- update(LM_lm_3,~.-logFat)
+summary(LM_lm_4)
+
+LM_lm_5 <- update(LM_lm_4,~.-logSeedLength)
+summary(LM_lm_5)
+
+LM_lm_6 <- update(LM_lm_5,~.-logSeedWidth)
+summary(LM_lm_6)
+
+LM_lm_7 <- update(LM_lm_6,~.-roughness)
+summary(LM_lm_7)
+
+LM_lm_8 <- update(LM_lm_7,~.-logProtein)
+summary(LM_lm_8)
+
+LM_lm_9 <- update(LM_lm_8,~.-long)
+summary(LM_lm_9)
+
+LM_lm_10 <- update(LM_lm_9,~.-aspect)
+summary(LM_lm_10)
+
+LM_lm_11 <- update(LM_lm_10,~.-logTannins)
+summary(LM_lm_11)
+
+LM_lm_12 <- update(LM_lm_11,~.-logNitrogen)
+summary(LM_lm_12)
+#model 12 has the fewest non-significant variables
+
+LM_lm_13 <- update(LM_lm_12,~.-Site)
+summary(LM_lm_13)
+
+AIC(LM_lm_1, LM_lm_2, LM_lm_2b, LM_lm_3, LM_lm_4, LM_lm_5, LM_lm_6, LM_lm_7, LM_lm_8, LM_lm_9, LM_lm_10, LM_lm_11, LM_lm_12, LM_lm_13 )
+#models 3, 4, and 8 have the best AIC values
+#I choose LM_lm_9
+#significant variables are logNitrogen, logTannins (marginally significant), logSLA, slope, SiteMaharira, SiteValohoaka, logFruitLength, logFruitWidth
+#this models explains about 97 of the variability in density (Adjusted R-squared = 0.9713)
+```
+
+<<<<<<< HEAD
 
 
 ```{r}
@@ -583,16 +899,20 @@ print(density_aov_plot)
 print(density_aov_plot2)
 ```
 
-Our best model, which contained all significant variables and was within 4 AIC values of the model with the lowest AIC, demonstrates that fruit nitrogen content, fruit length, and fruit width were significantly related to lemur density. With every increase in one percentage of nitrogen on the log scale, 
+Our best model with site as an independent vaiable demonstrates that fruit nitrogen content, latitude, roughness, slope, fruit length, fruit width, and the sites were significantly related to lemur density. This model explains46.7% of the variance in lemur density. With every increase in one percentage of nitrogen on the log scale, lemur density increases by 11.310 individuals per square Km (p = 0.007). With every increase in one degree latitude, lemur density decreases by 28.030 individuals per square Km (p = 0.021). With every increase in one roughness unit, lemur density decreases by 0.007 individuals per square Km (p = 0.0.021). With every increase in one degree in slope, lemur density increases by 0.259 individuals per square Km (p = 0.0294). Site Maharira has 8.080 fewer lemurs per square Km (p = 0.275) when compared to Ampatsona, whereas Valohoaka has 7.845 fewer (p = 0.0182) and Vohiparara has 6.291 fewer (0.02026). With every increase in one mm of mean fruit length on the log scale, lemur density increases by 8.711 individuals per square Km (p = 0.009). On the other hand, with every increase in one mm of mean fruit width on the log scale, lemur density decreases by 10.070 individuals per square Km (p = 0.002). When we included site as a random variable, only nitrogen content, fruit length, and fruit width were significantly related to lemur densities in the best model. However, this model explained less variation in lemur density (43.580%) than the model where it was included as an independent variable. With every increase in one percentage of mean nitrogen on the log scale, lemur density increases by 7.758 individuals per square Km (p = 0.002). With every increase in one mm of the mean fruit length, lemur density increases by 7.737 individuals per square Km (p = 0.00483). With every increase in one mm of the mean fruit width, lemur density decreases by 6.512 individuals per square Km (p = 0.0117).
+
+The linear models we created for each of the four species were significant. -must put something about rejecting the null and accepting the alternative hypothesis. We found that log seed length, latitude, log seed width, log SLA, Site Maharira, Site Valohoaka, Site Vohiparara, log fruit length, and log fruit width were related to the density of Avahi laniger. Further, we found that our model explained 79% of variation in Avahi laniger density (Adjusted R-squared =0.7924). The model for the Eulemur rubriventer species indicated that log nitrogen, log SLA, slope, SiteMaharira, SiteMiaranony, SiteValohoaka (marginally), Site Vohiparara, log fruit length, and log fruit width are relevant to Eulemur rubriventer densities. The model for Lepilemur microdon indicated that log nitrogen, log tannins (marginally), log SLA, slope, site Maharira, site Valohoaka, log fruit length, and log fruit width are relevant to the densities of the species. The model explained about 97 of the variability in density (Adjusted R-squared = 0.9713). The model for Propithecus edwardsi indicated that latitude, log seed width, log tannins, longitude, site Maharira, site Miaranony, siteValohoaka, siteVohiparara, log fruit length, and log fruit width are relevant to the densities of the species. This model explained about 75% of the variability in the density of the species (Adjusted R-squared: 0.7452). 
+
 
 \newpage
 
 # Summary and Conclusions
 
-There is a significant difference in Lemur population density between different species and between different sites. Although Miaranony and Valohoaka have greater lemur densities than the other sites, this is likely driven by outliers. Ampatsoana, Maharira, and Vohiparara all have similar lemur densities. Eulemur rubriventer, Propithecus edwardsi, and Microcebus rufus all tend to have higher densities than the other lemur species, while Varecia variegata, Lepilemur microdon, Avahi laniger, and Cheirogaleus crossleyi tend to have lower densities. 
+There is a significant difference in Lemur population density between different species and between different sites. Although Miaranony and Valohoaka have greater lemur densities than the other sites, this is likely driven by outliers. Ampatsoana, Maharira, and Vohiparara all have similar lemur densities. Eulemur rubriventer, Propithecus edwardsi, and Microcebus rufus all tend to have higher densities than the other lemur species, while Varecia variegata, Lepilemur microdon, Avahi laniger, and Cheirogaleus crossleyi tend to have lower densities. Our analyses demonstrate that these differences are related to fruit length, nitrogen content, and fruit width. Latitude, roughness, slope, and site also may be relevant, as indicated by the best linear model created using species and transect site as the only random effects. These results highlight the potential importance of plant functional traits in driving patterns of lemur density across a landscape. Latitude, roughness, and slope could also be expected to influence which plant species occur in different sites. However, differences in densities could also be reflective of life history characteristics or other variables that were not included in this study, such as human disturbance. These results could have management implications. For example, it could be beneficial to focus tree restoration efforts on species that contain the traits that are positively related to lemur densities, such as nitrogen content. Fruit length and fruit width are also related to lemur densities, although further studies would be needed to determine which fruit sizes and lengths best support various lemur species. Strategic decisions on which species to plant based could be made based off of the length and width of fruit provided by tree to best support the populations of specific lemur species. 
 
-Our analyses demonstrate that these differences are related to fruit length, nitrogen content, and fruit width. Linear models also indicated that the differences may be related to latitude, roughness, slope, and site. The linear model with the second best fit as calculated by AIC analysis indicated that those variables were also significant. These results highlight the potential importance of plant functional traits in driving patterns of lemur density across a landscape. However, differences in densities could also be reflective of life history characteristics or other variables that were not included in this study, such as human disturbance.  These results could have management implications. For example, it could be beneficial to focus tree restoration efforts on species that contain the traits that are positively related to lemur densities, such as nitrogen content (*and fruit width and fruit length, but I assume different species would like different fruit sizes). Future studies ought to integrate other variables into the analysis of this question. For example, other studies could investigate how functional traits and climatic variables interact with anthropogenic disturbance to drive patterns in lemur densities. Additionally, it would be interesting to incorporate lemur functional traits to analyze if lemur diets, body sizes, and behavioral traits are significantly related to their densities in a given area. We found that the variables that influence density differ between the lemur species. We found that fruit width and fruit length are related to the densities of each of the four species we analyzed using linear models. In addition, we found that various plant traits were related to the densities of different species. Seed length and seed width were significant for two of the species analyzed (AL and ER) and tannins were significant for two of the species (PE and LM). 
--latitude was significant for three of the species
+Our analyses further demonstrated that the variables related to lemur density differ between the various lemur species, although fruit width and fruit length are related to the densities of each of the four species we analyzed in depth. Fruit characteristics such as tannin concentration, seed length, and seed width were relevant to the densities of certain lemur species, while they weren't found to be relevant to the densities of other lemur species. Similarly, landscape characteristics such as slope and latitude were found to be relevant to the densities of certain lemur species. 
+
+Future studies ought to integrate other variables into the analysis of this question. For example, other studies could investigate how functional traits and climatic variables interact with anthropogenic disturbance to drive patterns in lemur densities. Additionally, it would be interesting to incorporate lemur functional traits to analyze if lemur diets, body sizes, and behavioral traits are significantly related to their densities in a given area.
 \newpage
 
 # References
