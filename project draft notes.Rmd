@@ -263,7 +263,7 @@ step_test_model <- lmer(data = trait_data2, Predicted ~ logNitrogen + logFruitLe
 summary(step_test_model)
 r.squaredGLMM(step_test_model)
 
-$4AIC(step_model, step_test_model, lemur_dens_lmer8, lemur_dens_lmer7)
+AIC(step_model, step_test_model, lemur_dens_lmer8, lemur_dens_lmer7)
 #based off of the results of the AIC, the step_test_model appears to explain the data better than the model I created manually
 #the significant variables of the best linear model for the entire data set are logNitrogen, logFruitLength, and logFruitWidth
 #the significant variables of the next best model (lemur_dens_lmer8) are logNitrogen, lat, roughness, slope, SiteSiteMaharira, SiteValohoaka, SiteVohiparara, logFruitLength, and logFruitWidth
@@ -434,7 +434,7 @@ LM_lm_2 <- update(LM_lm_1,~.-logSugar)
 summary(LM_lm_2)
 
 LM_lm_2b <- update(LM_lm_2,~.-Site)
-summary(LM_lm_idk)
+summary(LM_lm_2b)
 
 LM_lm_3 <- update(LM_lm_2,~.-lat)
 summary(LM_lm_3)
