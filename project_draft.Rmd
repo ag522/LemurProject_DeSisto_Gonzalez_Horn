@@ -129,7 +129,7 @@ trait_data2 <- lemur_data %>%
   mutate(Transect_Site2 = Transect_Site)%>%
   separate(col= Transect_Site2, into="Site", sep ="_")
 
-write.csv(trait_data2, "C:/ENV872/LemurProject_DeSisto_Gonzalez_Horn/Data/Processed/trait_data2.csv")
+#write.csv(trait_data2, "C:/ENV872/LemurProject_DeSisto_Gonzalez_Horn/Data/Processed/trait_data2.csv")
 
 
 density_anova <- aov(data= trait_data2, Predicted ~ Site)
@@ -206,13 +206,13 @@ Fruit_trait_nutrient_plot2 <- ggplot(traitdata_subset, aes(x = logProtein, y = P
 print(Fruit_trait_nutrient_plot2)
 # plot to visually explore the relationship between two other fruit trait variables that stood out in the correlation plot matrix and lemur density
 
-#Creating a linear model with random effects
+#Creating a linear model with random effects (transect site and species as random effects)
 lemur_dens_lmer1 <- lmer(data = trait_data2, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + Site + logFruitLength + logFat + aspect + logFruitWidth + logProtein + (1|Species) + (1|Transect_Site))
 summary(lemur_dens_lmer1)
 
 #Checking whether the linear model conforms to the assumptions of linear models
 par(mfrow = c(2,2), mar=c(4,4,4,4))
-plot(lmer_Species_TS1)
+plot(lemur_dens_lmer1)
 par(mfrow = c(1,1))
 #There appears to be a balance of positive and negative residuals, which is a good sign. However, there appears to be a strange pattern of three seperate lines with negative slopes
 
@@ -220,7 +220,7 @@ qqnorm(trait_data2$Predicted); qqline(trait_data2$Predicted)
 #This qqplot provides information on the normality of the response variable. The data doesn't follow a normal distribution that well, but I don't think its terrible
 
 #Reducing the linear model using the step function
-step(lmer_Species_TS1)
+step(lemur_dens_lmer1)
 #The step function found that Predicted ~ logNitrogen + lat + roughness + slope + Site + logFruitLength + logFruitWidth + (1 | Species) is the best model
 
 
@@ -259,21 +259,52 @@ summary(lemur_dens_lmer10)
 lemur_dens_lmer11 <- update(lemur_dens_lmer10,~.-SiteMiaranony)
 summary(lemur_dens_lmer11)
 
-lrtest(lemur_dens_lmer6, lemur_dens_lmer7, lemur_dens_lmer8, lmer_Species_TS9, lemur_dens_lmer10)
-AIC(lemur_dens_lmer6, lemur_dens_lmer7, lemur_dens_lmer8, lmer_Species_TS9, lemur_dens_lmer10)
-#models 6 and 7 seem to have the lowest AICs, but model 10 has only significant variables, so it is the one I have selected
-r.squaredGLMM(lemur_dens_lmer7)
-r.squaredGLMM(lemur_dens_lmer8)
-r.squaredGLMM(lemur_dens_lmer9)
-r.squaredGLMM(lemur_dens_lmer10)
-#lemur_dens_lmer_10 explains 46% of density
+lrtest(lemur_dens_lmer6, lemur_dens_lmer7, lemur_dens_lmer8, lemur_dens_lmer9, lemur_dens_lmer10)
+AIC(lemur_dens_lmer6, lemur_dens_lmer7, lemur_dens_lmer8, lemur_dens_lmer9, lemur_dens_lmer10)
+#models 6 and 7 seem to have the lowest AICs
+#I select either model 8
+#the significant variables of lemur_dens_8 are logNitrogen, lat, roughness, slope, SiteMaharira, SiteValohoaka, SiteVohiparara, logFruitLength, and logFruitWidth
 
-#checking the residuals of the final linear model
+r.squaredGLMM(lemur_dens_lmer8)
+#lemur_dens_lmer8 explains 46.7% of density
+
+#now creating a linear model using more random effects (site is now a random effect) to see if it fits the data better
+#Testing linear models with site as a random variable
+test <- lmer(data = trait_data2, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + logFruitLength + logFat + aspect + logFruitWidth + logProtein + (1|Species) + (1|Transect_Site) + (1|Site))
+summary(test)
+r.squaredGLMM(test)
+
+step(test)
+
+#the model below was created by the step function
+step_test_model <- lmer(data = trait_data2, Predicted ~ logNitrogen + logFruitLength + logFruitWidth + (1 | Species))
+summary(step_test_model)
+
+AIC(step_model, step_test_model, lemur_dens_lmer8, lemur_dens_lmer7)
+#based off of the results of the AIC, the step_test_model appears to explain the data better than the model I created manually
+#the significant variables of the best linear model for the entire data set are logNitrogen, logFruitLength, and logFruitWidth
+#the significant variables of the next best model (lemur_dens_lmer8) are logNitrogen, lat, roughness, slope, SiteSiteMaharira, SiteValohoaka, SiteVohiparara, logFruitLength, and logFruitWidth
+#Therefore, lat, roughness, slope, and site are interesting variables
+
+#checking the residuals of the final linear model for the entire data set (step_test_model)
 par(mfrow = c(2,2), mar=c(4,4,4,4))
-plot(lmer_Species_TS10)
+plot(step_test_model)
 par(mfrow = c(1,1))
 
+
+
+
 #Exploring drivers of density for individual species
+#I will explore the drivers of density for the two species with the greatest densities and the two species with the lowest densities
+
+checking_lemur_densities <-
+  trait_data2 %>% 
+  group_by(Species) %>% 
+  summarize(mean(Predicted))
+
+#Avahi_laniger and Lepilemur_microdon are the species with the lowest predicted densities. Eulemur_rubriventer and Propithecus_edwardsi are the species with the highest predicted densities. 
+#I will create linear models for each of these four species to analyze species specific drivers of density
+
 AL_subset <- filter(trait_data2, Species == "Avahi_laniger")
 
 AL_lm_1 <- lm(data = AL_subset, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + Site + logFruitLength + logFat + aspect + logFruitWidth + logProtein)
@@ -309,6 +340,158 @@ summary(AL_lm_10)
 AIC(AL_lm_2, AL_lm_3, AL_lm_4, AL_lm_5, AL_lm_6, AL_lm_7, AL_lm_8, AL_lm_9, AL_lm_10)
 #AL_lm_7 has the lowest AIC, and explains 82% of the variation of Avahi laniger densities 
 #AL_lm_10 has only significant variables, and explains 79% of the variation of Avahi laniger densities
+#I selected model AL_lm_10
+#logSeedLength, lat, logSeedWidth, logSLA, SiteMaharira, SiteMiaranony, SiteValohoaka, SiteVohiparara, logFruitLength, and logFruitWidth are significant variables
+
+ER_subset <- filter(trait_data2, Species == "Eulemur_rubriventer")
+
+ER_lm_1 <- lm(data = AL_subset, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + Site + logFruitLength + logFat + aspect + logFruitWidth + logProtein)
+summary(ER_lm_1)
+
+ER_lm_2 <- update(ER_lm_1,~.-aspect)
+summary(ER_lm_2)
+
+ER_lm_3 <- update(ER_lm_2,~.-logTannins)
+summary(ER_lm_3)
+
+ER_lm_4 <- update(ER_lm_3,~.-logSugar)
+summary(ER_lm_4)
+
+ER_lm_5 <- update(ER_lm_4,~.-logNitrogen)
+summary(ER_lm_5)
+
+ER_lm_6 <- update(ER_lm_5,~.-roughness)
+summary(ER_lm_6)
+
+ER_lm_7 <- update(ER_lm_6,~.-slope)
+summary(ER_lm_7)
+
+ER_lm_8 <- update(ER_lm_7,~.-logProtein)
+summary(ER_lm_8)
+
+ER_lm_9 <- update(ER_lm_8,~.-logFat)
+summary(ER_lm_9)
+
+ER_lm_10 <- update(ER_lm_9,~.-long)
+summary(ER_lm_10)
+#all variables are significant
+
+AIC(ER_lm_1, ER_lm_2, ER_lm_3, ER_lm_4, ER_lm_5, ER_lm_6, ER_lm_7, ER_lm_8, ER_lm_9, ER_lm_10)
+#7 has the lowest AIC
+summary(ER_lm_7)
+summary(ER_lm_8)
+summary(ER_lm_9)
+summary(ER_lm_10)
+#I selected ER_lm_10 because it had the best combination of a low AIC value and all significant variables
+#logSeedLength, lat, logseedwidth, logSLA, site, logfruitlength, logfruit width are significant variables
+#this model explaisn 79% of the y variable!
+
+#Propithecus_edwardsi has the second highest density
+PE_subset <- filter(trait_data2, Species == "Propithecus_edwardsi")
+
+
+PE_lmer_1 <- lmer(data = PE_subset, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + Site + logFruitLength + logFat + aspect + logFruitWidth + logProtein + (1|Site))
+summary(PE_lmer_1)
+
+step(PE_lmer_1)
+
+PE_step_lm <- lm(data = PE_subset, Predicted ~ lat + logSeedWidth + logTannins + long + Site + logFruitLength + logFruitWidth)
+summary(PE_step_lm)
+#the model generated by the step function explains 74.5% of the variation
+#the step model seems to indicate that I don't need to have site as a random variable
+
+PE_lm_1<- lm(data = PE_subset, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + Site + logFruitLength + logFat + aspect + logFruitWidth + logProtein)
+summary(PE_lm_1)
+
+PE_lm_2 <- update(PE_lm_1,~.-aspect)
+summary(PE_lm_2)
+
+
+PE_lm_3 <- update(PE_lm_2,~.-logFat)
+summary(PE_lm_3)
+
+PE_lm_4 <- update(PE_lm_3,~.-logNitrogen)
+summary(PE_lm_4)
+
+PE_lm_5 <- update(PE_lm_4,~.-roughness)
+summary(PE_lm_5)
+
+
+PE_lm_6 <- update(PE_lm_5,~.-logProtein)
+summary(PE_lm_6)
+
+PE_lm_7 <- update(PE_lm_6,~.-slope)
+summary(PE_lm_7)
+
+PE_lm_8 <- update(PE_lm_7,~.-logSLA)
+summary(PE_lm_8)
+
+PE_lm_9 <- update(PE_lm_8,~.-logSugar)
+summary(PE_lm_9)
+
+PE_lm_10 <- update(PE_lm_9,~.-logSeedLength)
+summary(PE_lm_10)
+
+AIC(PE_lm_1, PE_lm_2, PE_lm_3, PE_lm_4, PE_lm_5, PE_lm_6, PE_lm_7, PE_lm_8, PE_lm_9, PE_lm_10)
+#PE_lm 9 and 10 have the lowest and therefore the best AIC scores
+#I decided that PE_lm_10 is the best model, because it only contains significant variables
+summary(PE_lm_10)
+#lat, logseedwidth, logtannins, long, siteMaharira, SiteMiaranony, SiteValohoaka, SiteVohiparara, logFruitLength, and logFruitWidth are the significant variables
+
+#Lepilemur_microdon has the lowest average density of all of the lemurs analyzed
+LM_subset <- filter(trait_data2, Species == "Lepilemur_microdon")
+View(LM_subset)
+
+LM_lm_1<- lm(data = LM_subset, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + Site + logFruitLength + logFat + aspect + logFruitWidth + logProtein)
+summary(LM_lm_1)
+#Woa, this has an adjusted r squared value of 96.5!
+step(LM_lm_1)
+
+LM_lm_2 <- update(LM_lm_1,~.-logSugar)
+summary(LM_lm_2)
+
+LM_lm_2b <- update(LM_lm_2,~.-Site)
+summary(LM_lm_idk)
+
+LM_lm_3 <- update(LM_lm_2,~.-lat)
+summary(LM_lm_3)
+
+LM_lm_4 <- update(LM_lm_3,~.-logFat)
+summary(LM_lm_4)
+
+LM_lm_5 <- update(LM_lm_4,~.-logSeedLength)
+summary(LM_lm_5)
+
+LM_lm_6 <- update(LM_lm_5,~.-logSeedWidth)
+summary(LM_lm_6)
+
+LM_lm_7 <- update(LM_lm_6,~.-roughness)
+summary(LM_lm_7)
+
+LM_lm_8 <- update(LM_lm_7,~.-logProtein)
+summary(LM_lm_8)
+
+LM_lm_9 <- update(LM_lm_8,~.-long)
+summary(LM_lm_9)
+
+LM_lm_10 <- update(LM_lm_9,~.-aspect)
+summary(LM_lm_10)
+
+LM_lm_11 <- update(LM_lm_10,~.-logTannins)
+summary(LM_lm_11)
+
+LM_lm_12 <- update(LM_lm_11,~.-logNitrogen)
+summary(LM_lm_12)
+#model 12 has the fewest non-significant variables
+
+LM_lm_13 <- update(LM_lm_12,~.-Site)
+summary(LM_lm_13)
+
+AIC(LM_lm_1, LM_lm_2, LM_lm_2b, LM_lm_3, LM_lm_4, LM_lm_5, LM_lm_6, LM_lm_7, LM_lm_8, LM_lm_9, LM_lm_10, LM_lm_11, LM_lm_12, LM_lm_13 )
+#models 3, 4, and 8 have the best AIC values
+#I choose LM_lm_9
+#significant variables are logNitrogen, logTannins (marginally significant), logSLA, slope, SiteMaharira, SiteValohoaka, logFruitLength, logFruitWidth
+
 ```
 
 
