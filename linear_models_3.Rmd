@@ -133,6 +133,8 @@ par(mfrow = c(1,1))
 
 
 ```
+
+
 ```{r reducing the variables of the linear models with Species and Transect_Site as random effects}
 lmer_Species_TS2 <- update(lmer_Species_TS1,~.-logSLA)
 summary(lmer_Species_TS2)
@@ -255,6 +257,20 @@ summary(lmer_Species_TS_Site_8)
 
 #the 8th model has logNitrogen, logSeedWidth, roughness, long, logSugar, slope, logFruitLength, and logFruitWidth as significant variables
 #logTannins is marginally significant
+
+```
+
+```{r interactions?}
+
+lmer_test <- lmer(data = trait_data2, Predicted ~ logSeedLength + logNitrogen + lat + logSeedWidth + logTannins + roughness + long + logSugar + logSLA + slope + logFruitLength + logFat + aspect + logFruitWidth + logProtein + (1|Species) + (1|Transect_Site) + (1|Site))
+summary(lmer_test)
+
+step(lmer_test)
+
+lmer_test_step_model <- lmer(data = trait_data2, Predicted ~ logNitrogen + logFruitLength + logFruitWidth + (1 | Species))
+
+r.squaredGLMM(lmer_test)
+r.squaredGLMM(lmer_test_step_model)
 
 ```
 
