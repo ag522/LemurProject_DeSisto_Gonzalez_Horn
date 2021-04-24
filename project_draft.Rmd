@@ -181,7 +181,7 @@ Group                                                                           
 - *Eulemur rufifrons* ,*Hapalemur griseus*                                                                | 1.11 - 2.31
 - *Hapalemur griseus*,*Varecia variegata *,*Cheirogaleus crossleyi*,*Avahi laniger *,*Lepilemur microdon* | 0.24 - 1.11
 
->>>>>>> 82a58ecfeb4a4ed275c40ab5a8bfb29d48be0242
+
 ## Question 2: What variables are related to differences in lemur densities? 
 
 

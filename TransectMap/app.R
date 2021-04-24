@@ -55,11 +55,11 @@ ui <- fluidPage( #shinythemes::themeSelector(),
                             "Valohoaka","Vohiparara","ALL"), selected = "ALL"),
     #creates x variable dropdown 
     selectInput("X","Select X variable", 
-                choices = c("logSugar","logFat","logProtein",
+                choices = c("logSeedLength","logFruitWidth","logSugar","logFat","logProtein",
                             "logNitrogen","logTannins","tpi","roughness","slope","aspect"), selected = "logSugar"),
     # creates plot fill attribute dropdown
     selectInput("Fill","Select graph fill variable", 
-                choices = c("logSugar","logFat","logProtein",
+                choices = c("logSeedLength","logFruitWidth","logSugar","logFat","logProtein",
                             "logNitrogen","logTannins","tpi","roughness","slope","aspect"), selected = "logSugar")
    
    
