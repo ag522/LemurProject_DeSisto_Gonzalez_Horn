@@ -1,0 +1,61 @@
+---
+title: "linear_models_2"
+author: "Courtney Horn"
+date: "4/13/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+#checking working directory
+install.packages("Sleuth3")
+require(Sleuth3)
+install.packages("GGally")
+require(GGally)
+install.packages("lmtest")
+require(lmtest)
+install.packages("car")
+require(car)
+getwd()
+data_872 <- read.csv("./Data/Raw/872_data.csv", header = T, stringsAsFactors = TRUE)
+```
+
+## R Markdown
+
+
+
+```{r density by site}
+#I reject the null hypothesis and conclude that there is a significant difference in lemur densities between different sites (p = 0.009).
+# There is a significant difference in lemur densities between Miaranony and Ampatsoana, Miaranony and Maharira, 
+#and Miaranony and Vohiparara 
+# the predicted groups according to their lemur densities are Miaranony and Valohoaka being in group a 
+# and Valohoaka, Vohiparara, Ampatsoana, and Maharira in group b 
+
+colnames(data_872)
+#logSeedLength, logNitrogen, lat, long, Transect_Site, LogSeedWidth, logTannins, roughness, long, logSugar, logSLA, slop, logFruitLength, logFat, Species, LogFruitWidth, logProtein all seem to be interesting variables based off of visual inspection
+
+#I need to fit the maximum model and then simplify to find a minimum adequate model
+#i think i will need generalized linear mixed models
+class(data_872)
+colnames(data_872)
+#it seems that what Camille has done so far is one way ANOVA
+#ANOVA tells us whether whether an explanatory variable explained a significant proportion of the variation in the response variable 
+class(data_872$Predicted)
+#predicted is a continuous numeric value
+#ggpairs(data_872)
+
+glm1 <- glm(Predicted ~ logFruitLength * logSeedWidth * logProtein * logSLA * tpi * aspect * long * Transect_Site * logFruitWidth * logSugar * logNitrogen * Species * roughness * flowdir * WD * logSeedLength * logFat * logTannins * slope * late, family = binomial, data = data_872)
+glm1 <- glm()
+
+
+#factor(BK)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
