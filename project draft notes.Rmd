@@ -59,28 +59,9 @@ In this project, we examine a suite of environmental factors in relation to lemu
 \newpage
 
 # Dataset Information
-Data for this project were collected by James Herrera and Camille DeSisto, as a part of a larger project aimed at investigating plant-animal interactions in Madagascar's eastern rainforests. Field data were collected by James Herrera and his colleagues in the montane evergreen rainforest of Ranomafana National Park in southwestern Madagascar. They conducted diurnal and nocturnal lemur surveys at five sites (Ampatsoana, Maharira, Miaranony, Valohoaka, and Vohiparara) between 2011 and 2014. Diurnal lemur surveys were conducted at 31 transects among these five sites, whereas nocturnal lemur surveys were conducted at 26 of these sites due to logistical constraints. Habitat variables (slope, roughness, location, topogaphic position index, elevation, flow direction, and aspect) were collected along each transects. Additionally, vegetation data were collected from botanical surveys every 100 m along each transect. Camille DeSisto calculated lemur densities using a distance sampling and model averaging approach that jointly modeled for detection and density, using the R packages "unmarked" and "MuMln" (Fiske & Chandler 201; Barton 2020). Trait data were previously collected from the literature and mean trait values were calculated for each transect as part of the larger research project. Upon the start of this final project, the dataset was already clean and did not require additional wrangling to be used for our spatial visualization or linear models. However, we did use data wangling to summarise the transects by group in order to conduct the analysis of variance. 
+Data for this project were collected by James Herrera and Camille DeSisto, as a part of a larger project aimed at investigating plant-animal interactions in Madagascar's eastern rainforests. Field data were collected by James Herrera and his colleagues in the montane evergreen rainforest of Ranomafana National Park in southwestern Madagascar. They conducted diurnal and nocturnal lemur surveys at five sites (Ampatsoana, Maharira, Miaranony, Valohoaka, and Vohiparara) between 2011 and 2014. Diurnal lemur surveys were conducted at 31 transects among these five sites, whereas nocturnal lemur surveys were conducted at 26 of these sites due to logistical constraints. Habitat variables (slope, roughness, location, topogaphic position index, elevation, flow direction, and aspect) were collected along each transects. Additionally, vegetation data were collected from botanical surveys every 100 m along each transect. Camille DeSisto calculated lemur densities using a distance sampling and model averaging approach that jointly modeled for detection and density, using the R packages "unmarked" and "MuMln" (Fiske & Chandler 201; Barton 2020). Trait data were previously collected from the literature and mean trait values were calculated for each transect as part of the larger research project. Upon the start of this final project, the dataset was already clean and did not require additional wrangling to be used for our spatial visualization or linear models. However, we did use data wangling to summarise the transects by group in order to conduct the analysis of variance.
+We also created a Transect Map App to better visualize the data by species and site as well as allowing the user to select a variable and visualize it's relationship with population density for a particular species per site. 
 
-
-```{r, fig.cap= "Map of all 31 project transect sites around Ranomafana National Park, Madagascar."}
-Sf_LemurData <- st_as_sf(lemur_data,
-                             coords = c('long','lat'),
-                             crs = 4326)
-
-Sf_Sites<- Sf_LemurData %>%
-  mutate(Transect_Site2 = Transect_Site) %>%
-  separate(col= Transect_Site2, into="Site", sep ="_") %>%
-  group_by(Transect_Site, Site) %>%
-  summarise(meanSpeciesDensity = mean(Predicted),
-            tpi = mean(tpi),
-            roughness=mean(roughness),
-            slope= mean(slope),
-            aspect = mean(aspect),
-            flowdir = mean(flowdir),
-            WD = mean(WD))
-
-Map_Transect<- mapview(Sf_Sites,zcol="Site", legend = TRUE, alpha=0.5, cex=8, label = "Transect_Site",layer.name = 'Site')
-Map_Transect
 ```
 
 
@@ -282,7 +263,7 @@ step_test_model <- lmer(data = trait_data2, Predicted ~ logNitrogen + logFruitLe
 summary(step_test_model)
 r.squaredGLMM(step_test_model)
 
-$4AIC(step_model, step_test_model, lemur_dens_lmer8, lemur_dens_lmer7)
+AIC(step_model, step_test_model, lemur_dens_lmer8, lemur_dens_lmer7)
 #based off of the results of the AIC, the step_test_model appears to explain the data better than the model I created manually
 #the significant variables of the best linear model for the entire data set are logNitrogen, logFruitLength, and logFruitWidth
 #the significant variables of the next best model (lemur_dens_lmer8) are logNitrogen, lat, roughness, slope, SiteSiteMaharira, SiteValohoaka, SiteVohiparara, logFruitLength, and logFruitWidth
@@ -453,7 +434,7 @@ LM_lm_2 <- update(LM_lm_1,~.-logSugar)
 summary(LM_lm_2)
 
 LM_lm_2b <- update(LM_lm_2,~.-Site)
-summary(LM_lm_idk)
+summary(LM_lm_2b)
 
 LM_lm_3 <- update(LM_lm_2,~.-lat)
 summary(LM_lm_3)
