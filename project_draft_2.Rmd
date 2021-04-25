@@ -71,7 +71,7 @@ Upon the start of this final project for ENV872, the dataset was already clean a
 
 # Exploratory Analysis 
 
-We conducted an exploratory analysis of our data visually using a heatmap to show differences in lemur densities among the different transects and species (Figure 1). Visualizations in throughout this project were conducted using the "ggplot2" package (Wockham 2016). Additionally, we calculated summary statistics for the numeric habitat variables in our dataset, as well as lemur densities (Table 1). 
+We conducted an exploratory analysis of our data visually using a heatmap to show differences in lemur densities among the different transects and species (Figure 1). Visualizations in throughout this project were conducted using the "ggplot2" package (Wockham 2016). Additionally, we calculated summary statistics for the numeric habitat variables in our dataset, as well as lemur densities (Table 1). Details on the variables are available in the metedata file on the Github repository.
 ```{r, include= FALSE}
 head(lemur_data)
 dim(lemur_data)
@@ -563,7 +563,7 @@ AIC(LM_lm_1, LM_lm_2, LM_lm_2b, LM_lm_3, LM_lm_4, LM_lm_5, LM_lm_6, LM_lm_7, LM_
 
 \newpage
 
-#Results
+# Results
 
 ## Question 1: Are there significant differences in lemur densities among the different sites and among the different species? If so, how can the sites and species be grouped to reflect the patterns in densities? 
 
@@ -576,11 +576,12 @@ print(density_aov_plot)
 There is also a significant difference in lemur densities between different species (F (8,250) = 16.79, p = <2e-16; Figure 3). The HSD post-hoc test indicates that lemur species can be categorized into four main groups according to their density (Table 2). 
 
 Group                                                                                                     | Average population Density
-------------------------------|---------------------------------------------------------------------------|-----------------------------
+----------------------------------------------------------------------------------------------------------|-----------------------------
 - *Eulemur rubriventer*,*Propithecus edwardsi*,*Microcebus rufus*                                         | 2.72 - 3.80
 - *Propithecus edwardsi*,*Microcebus rufus*,*Eulemur rufifrons*                                           | 2.31 - 3.03
 - *Eulemur rufifrons* ,*Hapalemur griseus*                                                                | 1.11 - 2.31
 - *Hapalemur griseus*,*Varecia variegata *,*Cheirogaleus crossleyi*,*Avahi laniger *,*Lepilemur microdon* | 0.24 - 1.11
+
 Table 2. Groupings of lemur species according to their population densities.  
 
 ```{r , fig.cap="Figure 3. Boxplot of lemur densities for each species surveyed.", echo = FALSE}
