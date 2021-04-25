@@ -16,59 +16,54 @@ data <- data %>%
     mutate(Transect_Site2 = Transect_Site) %>%
     separate(col= Transect_Site2, into="Site", sep ="_") 
 
-# Define UI for application 
-ui <- fluidPage( #shinythemes::themeSelector(),
+# Define UI for application that draws a histogram
+ui <- fluidPage( shinythemes::themeSelector(),
 
     # Application title
     titlePanel("Transect Site Information"),
-  
+    
     sidebarLayout(
         
         mainPanel(
-          #Create Map output
     leafletOutput(outputId="mymap"),
-    #Create space between map and graph outputs
     br(),
     br(),
     br(),
     br(),
-    #Create graph output
+    br(),
+    br(),
+    br(),
+    br(),
     plotOutput("scatterplot" , brush = brushOpts(id = "scatterplot_brush")),
     
-    ),
     
+    
+    
+    ),
     sidebarPanel(
-      #Add widget so user can select a theme
-      shinythemes::themeSelector(),
-      #creates species dropdown 
     selectInput("Species","Select a Species:", 
     choices = c("Avahi_laniger","Cheirogaleus_crossleyi",
                 "Eulemur_rubriventer","Propithecus_edwardsi",
                 "Lepilemur_microdon","Hapalemur_griseus",
                  "Eulemur_rufifrons","Varecia_variegata",
-                 "Microcebus_rufus" ), selected = "Eulemur_rubriventer"),
-    #Creates Lemur Image Output
-    imageOutput("image"),
-    #creates site dropdown 
+                 "Microcebus_rufus" ), selected = "Avahi_laniger"),
+    
     selectInput("site","Select Site", 
                 choices = c("Ampatsoana","Maharira","Miaranony",
                             "Valohoaka","Vohiparara","ALL"), selected = "ALL"),
-    #creates x variable dropdown 
     selectInput("X","Select X variable", 
-                choices = c("logSeedLength","logFruitWidth","logSugar","logFat","logProtein",
+                choices = c("logSugar","logFat","logProtein",
                             "logNitrogen","logTannins","tpi","roughness","slope","aspect"), selected = "logSugar"),
-    # creates plot fill attribute dropdown
     selectInput("Fill","Select graph fill variable", 
-                choices = c("logSeedLength","logFruitWidth","logSugar","logFat","logProtein",
+                choices = c("logSugar","logFat","logProtein",
                             "logNitrogen","logTannins","tpi","roughness","slope","aspect"), selected = "logSugar")
-   
    
     )
     ))
         
 
 
-# Define server logic required 
+# Define server logic required to draw a histogram
 
 server <- function(input, output) {
     #Subset data based on user selection
@@ -90,7 +85,7 @@ server <- function(input, output) {
         leaflet(filteredData()) %>% 
             addTiles() %>%
             addCircles( weight = 1, radius = ~sqrt(Predicted)*250, 
-                        popup = ~as.character(Transect_Site),
+                        popup = ~as.character(Predicted),
                         label = ~as.character(paste0("Population Density: ",
                                  sep = " ", Predicted)),color = ~pal(Predicted),
                                               fillOpacity = 0.9)%>%
@@ -99,26 +94,14 @@ server <- function(input, output) {
                       opacity=1)
             
             })
-    #Selects  Lemur image accroding to species selected
-    output$image<- renderImage({
-      return(list(
-        src=as.character(paste0(input$Species,".png")),
-        contentType = "image/png",
-        width = 350,
-        alt = "Lemur"))
-    
-    })
-    
     # Create a ggplot object for the type of plot you have defined in the UI  
     output$scatterplot <- renderPlot({
-      ggplot(filteredData(), 
-             aes_string(x = input$X, y = "Predicted", fill=input$Fill)) +
-        geom_point(alpha = 0.8, size = 10, shape = 21) +
-        geom_smooth(method = lm, se=FALSE, color="red", aes(group = 1)) +
-        theme_classic(base_size = 14) +
-        scale_shape_manual(values = c(21, 24)) +
-        labs(x = input$X, y = "Lemur Population Density",  fill = input$Fill) +
-        scale_fill_distiller(palette = "YlGnBu", guide = "colorbar", direction = 1)
+        ggplot( filteredData() ,
+               aes_string(x = input$X, y ="Predicted", fill = input$Fill )) +
+            geom_point(alpha = 0.9, size = 8) +
+            theme_classic(base_size = 15) +
+            labs(x = input$X , y =expression(Population ~ (mu*g / L)),fill = input$Fill  ) +
+            scale_fill_distiller(palette = "GnBu", guide = "colorbar", direction = 1)
         #scale_fill_viridis_c()
     })
   
