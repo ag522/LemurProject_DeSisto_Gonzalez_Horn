@@ -45,7 +45,7 @@ mytheme <- theme_classic(base_size = 12) +
         legend.position = "bottom")
 theme_set(mytheme)
 # Load your datasets
-lemur_data <- read.csv("872_data.csv", header=T, stringsAsFactors = TRUE)
+lemur_data <- read.csv("./Data/Raw/872_data.csv", header=T, stringsAsFactors = TRUE)
 
 ```
 
