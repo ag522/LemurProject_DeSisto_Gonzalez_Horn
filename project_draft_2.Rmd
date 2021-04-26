@@ -95,10 +95,13 @@ density_plot <- ggplot(lemur_data, aes(x = Species, y =Transect_Site))+
 ```
 
 
-```{r, fig.cap= "Figure 1. Heat map of lemur densities at each project transect site", echo = FALSE }
-density_plot
+```{r, fig.align= 'center', fig.cap= "Heat map of lemur densities at each project transect site", echo = FALSE }
+print(density_plot)
 
-```
+``` 
+\newpage 
+
+
 
 ```{r, echo = FALSE}
 transect_variables_mean <- lemur_data %>%
@@ -187,7 +190,7 @@ transect_variables_summary<- cbind(stats, transect_variables_summary)
 transect_variables_summary <- data.frame(t(transect_variables_summary[-1]))
 colnames(transect_variables_summary) <- c("Maximum", "Minimum", "Mean", "Standard Deviation")
 
-kable(transect_variables_summary, caption ="Table 1. Summary Statistics for Transect-Level Variables")
+kable(transect_variables_summary, caption ="Summary Statistics for Transect-Level Variables")
 
 ```
 
@@ -561,7 +564,7 @@ AIC(LM_lm_1, LM_lm_2, LM_lm_2b, LM_lm_3, LM_lm_4, LM_lm_5, LM_lm_6, LM_lm_7, LM_
 #this models explains about 97 of the variability in density (Adjusted R-squared = 0.9713)
 ```
 
-\newpage
+
 
 # Results
 
@@ -569,7 +572,7 @@ AIC(LM_lm_1, LM_lm_2, LM_lm_2b, LM_lm_3, LM_lm_4, LM_lm_5, LM_lm_6, LM_lm_7, LM_
 
 There is a significant difference in lemur densities between different sites (F(4,254) = 3.469, p = 0.009; Figure 2). In particular, the post-hoc Tukey HSD test revealed that there are significant differences in densities between Miaranony and Ampatsoana (p = 0.0287), Miaranony and Maharira (p = 0.031) and Vohiparara and Miaranony (p = 0.386) sites. However, visual analysis of lemur densities via boxplots boxplots (Figure 2) suggests that the higher lemur densities observed in  Miaranony and Valohoaka may be appributable to outliers. An HSD post-hoc test from the R package "agricolae" (de Mendiburu 2020) indicates that the sites can be categorized into two main groups according to their lemur densities, with Miaranony in one group, Vohiparara, Ampatsona, and Maharira in another group, and Valohoaka in both groups.
 
-```{r, fig.cap="Figure 2. Boxplot of lemur densities at each sampling site." , echo = FALSE}
+```{r, fig.cap="Boxplot of lemur densities at each sampling site." , echo = FALSE}
 print(density_aov_plot)
 ```
 
@@ -582,9 +585,9 @@ Group                                                                           
 - *Eulemur rufifrons* ,*Hapalemur griseus*                                                                | 1.11 - 2.31
 - *Hapalemur griseus*,*Varecia variegata *,*Cheirogaleus crossleyi*,*Avahi laniger *,*Lepilemur microdon* | 0.24 - 1.11
 
-Table 2. Groupings of lemur species according to their population densities.  
+Table: Groupings of lemur species according to their population densities.  
 
-```{r , fig.cap="Figure 3. Boxplot of lemur densities for each species surveyed.", echo = FALSE}
+```{r , fig.cap="Boxplot of lemur densities for each species surveyed.", echo = FALSE}
 print(density_aov_plot2)
 ```
 
@@ -599,7 +602,7 @@ When we included site as a random variable, only nitrogen content, fruit length,
 In our species-specific models, we identified that lemur species differ in their relationships to the habitat variables. Based on our best model for *Avahi laniger*, we found that log seed length, latitude, log seed width, log SLA, site Maharira, site Valohoaka, site Vohiparara, log fruit length, and log fruit width were related to the density of Avahi laniger (p < 0.001). This model explains 82.4% of variation in density. The model for the *Eulemur rubriventer* species indicated that log nitrogen, log SLA, slope, SiteMaharira, SiteMiaranony, SiteValohoaka (marginally), Site Vohiparara, log fruit length, and log fruit width are relevant to *Eulemur rubriventer* densities (p = 0.002). This model explains 56.95% of the variation in the density data. The model for Lepilemur microdon indicated that log nitrogen, log tannins (marginally), log SLA, slope, site Maharira, site Valohoaka, log fruit length, and log fruit width are significantly related to the density of this species (p < 0.001). The model explained 97.13% of the variability in density. The model for *Propithecus edwardsi* indicated that latitude, log seed width, log tannins, longitude, site Maharira, site Miaranony, siteValohoaka, siteVohiparara, log fruit length, and log fruit width are relevant to the densities of the species (p < 0.001). This model explained about 75% of the variability in the density of the species (Adjusted R-squared: 0.7452). Again, data visualization of the relationships between key habitat variables and lemur densities are found on the R Shinp application. 
 
 
-\newpage
+
 
 # Summary and Conclusions
 
